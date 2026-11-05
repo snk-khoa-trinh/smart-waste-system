@@ -33,7 +33,7 @@ flowchart LR
 | [infra](infra/) | [Broker accounts and topic permissions](infra/README.md) | [AGENTS](infra/AGENTS.md) |
 | [simulator](simulator/) | [Explicit synthetic demo data](simulator/README.md) | [AGENTS](simulator/AGENTS.md) |
 | [docs](docs/) | [Architecture, contracts and hardware history](docs/README.md) | [AGENTS](docs/AGENTS.md) |
-| [.github](.github/) | [CI checks](.github/README.md) | [AGENTS](.github/AGENTS.md) |
+| [.github](.github/) | [CI checks](docs/ci.md) | [AGENTS](.github/AGENTS.md) |
 
 Agents should read [root instructions](AGENTS.md) before the instructions for
 folders they change. Commands below run from the repository root.

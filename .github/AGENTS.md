@@ -1,6 +1,6 @@
 # CI agent rules
 
-Read [root baseline](../AGENTS.md) and [CI guide](README.md).
+Read [root baseline](../AGENTS.md) and [CI guide](../docs/ci.md).
 
 - Use pinned uv/Nub/PlatformIO versions consistent with repository commands and
   lockfiles. Firmware CI builds only camera/station and never uploads to devices.

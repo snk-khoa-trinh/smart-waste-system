@@ -7,6 +7,7 @@
 | Guide | Read for |
 | --- | --- |
 | [Architecture](architecture.md) | Services, device responsibilities and data flow |
+| [Continuous integration](ci.md) | Automated checks and isolated integration workflow |
 | [HTTP API](api.md) | Routes, validation, inference and outcome contracts |
 | [MQTT](mqtt.md) | Topic schemas, source/quality and device permissions |
 | [Station operation and evidence](autonomous-station.md) | Autonomous controller, arrival/frame locking, calibration, broker recovery and chronological hardware findings |

@@ -1,8 +1,8 @@
 # Continuous integration
 
-[Repository guide](../README.md) · [Agent rules](AGENTS.md)
+[Repository guide](../README.md) · [CI agent rules](../.github/AGENTS.md)
 
-`workflows/ci.yaml` checks Python lint/tests/migrations, Nub frontend lint/tests/
+[CI workflow](../.github/workflows/ci.yaml) checks Python lint/tests/migrations, Nub frontend lint/tests/
 build, isolated mock Compose integration, native firmware logic and both active
 firmware environments (`camera`, `station`). Test source remains committed so a
 fresh checkout can reproduce these checks. Generated results and private device
