@@ -1,0 +1,59 @@
+name: checks
+on: [push, pull_request]
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: '0.12.13'}
+      - run: uv sync --frozen
+        working-directory: backend
+      - run: uv run ruff check app tests migrations ../simulator ../scripts
+        working-directory: backend
+      - run: uv run pytest -q
+        working-directory: backend
+        env: {ROBOFLOW_API_KEY: test-only}
+      - run: uv run alembic upgrade head && uv run python -m app.seed && uv run python -m app.seed
+        working-directory: backend
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nubjs/setup-nub@v0
+        with:
+          nub-version: '0.9.0'
+          node-version: '24'
+          working-directory: frontend
+          cache-dependency-path: frontend/nub.lock
+      - run: nub ci
+        working-directory: frontend
+      - run: nub run lint && nub run test && nub run build
+        working-directory: frontend
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: docker compose --profile demo up --build -d --wait
+      - run: docker compose exec -T api python /app/simulator/verify.py
+      - uses: nubjs/setup-nub@v0
+        with:
+          nub-version: '0.9.0'
+          node-version: '24'
+          working-directory: frontend
+          cache-dependency-path: frontend/nub.lock
+      - run: nub ci && nub exec playwright install --with-deps chromium && nub run test:e2e
+        working-directory: frontend
+      - if: always()
+        run: docker compose --profile demo logs --tail 80
+      - if: always()
+        run: docker compose --profile demo down -v
+
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with: {version: '0.12.13'}
+      - run: ./scripts/check-firmware.sh

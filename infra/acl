@@ -1,0 +1,7 @@
+user worker
+topic read $SYS/broker/version
+topic read waste/v1/stations/+/+/+
+user simulator
+topic write waste/v1/stations/+/+/fill
+topic write waste/v1/stations/+/+/heartbeat
+topic write waste/v1/stations/+/+/outcome

@@ -1,0 +1,116 @@
+name: smart-waste
+x-backend: &backend
+  build:
+    context: .
+    dockerfile: backend/Dockerfile
+  env_file: .env
+  environment: &backend-env
+    DATABASE_URL: postgresql+psycopg://waste:waste-local@db:5432/waste
+    MQTT_HOST: broker
+  restart: unless-stopped
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: waste
+      POSTGRES_PASSWORD: waste-local
+      POSTGRES_DB: waste
+    volumes: [postgres:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U waste -d waste']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  broker-init:
+    image: eclipse-mosquitto:2.0
+    environment:
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-worker-local}
+      MQTT_SIM_PASSWORD: ${MQTT_SIM_PASSWORD:-simulator-local}
+    user: root
+    volumes: [broker-config:/config, './infra:/source:ro']
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - |
+        # Starting the base stack must not replace provisioned hardware users
+        # and ACLs with demo accounts. Explicit hardware repair still rewrites
+        # these files through compose.hardware.yaml.
+        if [ -s /config/passwords ] && [ -s /config/acl ] && [ -s /config/mosquitto.conf ]; then
+          echo 'Keeping existing broker credentials and ACLs.'
+          exit 0
+        fi
+        cp /source/mosquitto.conf /source/acl /config/
+        mosquitto_passwd -b -c /config/passwords worker "$$MQTT_PASSWORD"
+        mosquitto_passwd -b /config/passwords simulator "$$MQTT_SIM_PASSWORD"
+        chown -R 1883:1883 /config
+        chmod 600 /config/passwords
+    restart: 'no'
+  broker:
+    image: eclipse-mosquitto:2.0
+    environment:
+      MQTT_PASSWORD: ${MQTT_PASSWORD:-worker-local}
+    volumes: [broker-config:/mosquitto/config:ro]
+    depends_on:
+      broker-init: {condition: service_completed_successfully}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          mosquitto_sub -h 127.0.0.1 -u worker -P "$$MQTT_PASSWORD"
+          -t '$$SYS/broker/version' -C 1 -W 3
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  init:
+    <<: *backend
+    command: [sh, -ec, 'alembic upgrade head && python -m app.seed']
+    depends_on:
+      db: {condition: service_healthy}
+    restart: 'no'
+  api:
+    <<: *backend
+    ports: ['127.0.0.1:8000:8000']
+    depends_on:
+      init: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/ready')"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  worker:
+    <<: *backend
+    command: [python, -m, app.worker]
+    healthcheck:
+      test: [CMD, python, -c, "from pathlib import Path; assert Path('/tmp/mqtt-connected').exists()"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    depends_on:
+      init: {condition: service_completed_successfully}
+      broker: {condition: service_healthy}
+  simulator:
+    <<: *backend
+    env_file: []
+    profiles: [demo]
+    command: [python, /app/simulator/main.py]
+    environment:
+      MQTT_HOST: broker
+      MQTT_SIM_PASSWORD: ${MQTT_SIM_PASSWORD:-simulator-local}
+      SIMULATOR_SEED: ${SIMULATOR_SEED:-42}
+      API_URL: http://api:8000
+    depends_on:
+      api: {condition: service_healthy}
+      broker: {condition: service_healthy}
+      worker: {condition: service_healthy}
+  frontend:
+    build: ./frontend
+    ports: ['127.0.0.1:5173:80']
+    depends_on:
+      api: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, --spider, 'http://127.0.0.1/']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+volumes:
+  postgres:
+  broker-config:

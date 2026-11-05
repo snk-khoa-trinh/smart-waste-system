@@ -1,0 +1,22 @@
+.git
+.env
+**/.venv
+**/node_modules
+**/dist
+**/__pycache__
+**/*.db
+**/.pytest_cache
+**/.pio
+**/images
+.env.*
+.hardware-backups
+
+
+# Tests stay versioned for CI, outside production build contexts.
+backend/tests/
+firmware/tests/
+scripts/local/
+**/.ruff_cache
+**/test-results
+**/playwright-report
+**/*.local.h

@@ -1,0 +1,21 @@
+# Frontend hot reload; backend services retain their existing configuration.
+services:
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    # Override the base nginx container port mapping.
+    ports: !override
+      - '127.0.0.1:5173:5173'
+    environment:
+      API_URL: http://api:8000
+    volumes:
+      - ./frontend/src:/app/src:ro
+      - ./frontend/index.html:/app/index.html:ro
+      - ./frontend/vite.config.ts:/app/vite.config.ts:ro
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+    healthcheck:
+      test: [CMD, nub, --node, -e, 'fetch("http://127.0.0.1:5173/").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))']
+      interval: 10s
+      timeout: 5s
+      retries: 10
