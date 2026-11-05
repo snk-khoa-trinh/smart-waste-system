@@ -2,19 +2,9 @@
 
 This is a local monitoring and sorting demonstration. The API and MQTT worker share a small Python application and a PostgreSQL database. The frontend polls API data every five seconds. Twelve seeded bins span five floors across Innovation Campus and Central Mall; the seed creates identity/configuration only, not fabricated physical readings.
 
-```mermaid
-flowchart LR
-  CAM[ESP32-CAM: inlet and retained JPEG] -->|arrival key + JPEG| BRAIN[DevKit station controller]
-  BRAIN -->|classify + separate outcome HTTP| API[FastAPI]
-  API <--> P[Explicit mock or Roboflow workflow]
-  API --> DB[(PostgreSQL)]
-  BRAIN -->|calibrated motion| Motors[Chute and flap]
-  BRAIN -->|fill + heartbeat| MQTT[Mosquitto]
-  CAM -->|heartbeat| MQTT
-  MQTT --> W[Separate MQTT worker]
-  W --> DB
-  UI[React dashboard] -->|poll / collections / image lab| API
-```
+![Smart Waste System architecture](assets/system-architecture.svg)
+
+[Editable Mermaid source](assets/system-architecture.mmd)
 
 A prediction and actuation outcome are distinct columns with separate timestamps. Unknown predictions have a reason and cannot be marked completed. Simulator outcomes are labelled simulated. No actuator commands are sent by the server.
 

@@ -7,20 +7,9 @@ the chute and flap for accepted categories. The backend records classification
 and physical outcomes separately. MQTT carries board heartbeats and fill readings;
 the React dashboard shows bins, collection tasks and records.
 
-```mermaid
-flowchart LR
-  Inlet[Inlet sensor] --> Camera[ESP32-CAM: retained JPEG]
-  Camera --> Brain[DevKit: station controller]
-  Brain --> API[FastAPI]
-  API <--> Model[Mock or Roboflow]
-  API --> Brain
-  Brain --> Servos[Chute and flap]
-  Brain --> MQTT[MQTT broker and worker]
-  Camera --> MQTT
-  MQTT --> DB[(PostgreSQL)]
-  API <--> DB
-  UI[Vite dashboard] <--> API
-```
+![SWS architecture: inlet and camera, station controller, inference API, servos, MQTT, database and dashboard.](docs/assets/system-architecture.svg)
+
+[Editable diagram source](docs/assets/system-architecture.mmd)
 
 ## Start with the relevant folder
 

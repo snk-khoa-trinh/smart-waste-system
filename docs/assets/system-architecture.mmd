@@ -1,0 +1,12 @@
+flowchart LR
+  Inlet["Inlet sensor"] --> Camera["ESP32-CAM: retained JPEG"]
+  Camera --> Brain["DevKit: station controller"]
+  Brain --> API["FastAPI"]
+  API <--> Model["Mock or Roboflow"]
+  API --> Brain
+  Brain --> Servos["Chute and flap"]
+  Brain --> MQTT["MQTT broker and worker"]
+  Camera --> MQTT
+  MQTT --> DB[("PostgreSQL")]
+  API <--> DB
+  UI["Vite dashboard"] <--> API
