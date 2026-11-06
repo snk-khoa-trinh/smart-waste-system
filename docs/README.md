@@ -12,6 +12,7 @@
 | [MQTT](mqtt.md) | Topic schemas, source/quality and device permissions |
 | [Station operation and evidence](autonomous-station.md) | Autonomous controller, arrival/frame locking, calibration, broker recovery and chronological hardware findings |
 | [Building previews](building-preview.md) | Shared 2D/3D geometry, interactions and validation |
+| [Demo filming handoff](filming-handoff.md) | Shot list, recording actions, full-cycle takes and editing checklist |
 | [Firmware README](../firmware/README.md) | Current camera/station source files and build/upload commands |
 | [Scripts README](../scripts/README.md) | Current setup, operation and diagnostic commands |
 
