@@ -15,9 +15,11 @@ export default function App() {
     ? "Bins"
     : pathname.startsWith("/records")
       ? "Records"
-      : pathname.startsWith("/inference")
-        ? "Inference lab"
-        : "Overview";
+      : pathname.startsWith("/routes")
+        ? "Collection route"
+        : pathname.startsWith("/inference")
+          ? "Inference lab"
+          : "Overview";
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     try {
       return localStorage.getItem("loop-sidebar") !== "collapsed";

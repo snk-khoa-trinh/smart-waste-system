@@ -66,3 +66,10 @@ locks immediately; a configurable delayed fresh exposure is retained until the
 controller finishes. Current local capture delay is800ms; calibration is stored
 on the camera and depends on the assembled mount. Firmware compilation does not
 establish correct item imaging, calibrated fullness or successful physical sorting.
+
+USB `cycle reverse` is reserved for staged filming: classifier2000→700→2000us,
+with the same close/position/open/close/return ordering. It ends holding2000us and
+opener1800us; ordinary routing/startup still use home700us. Status advertises
+`filming_reverse_supported`; the laptop refuses reverse motion on old firmware.
+It is never selected by autonomous classification. See the
+[filming handoff](../docs/filming-handoff.md) for the two-position limitation.

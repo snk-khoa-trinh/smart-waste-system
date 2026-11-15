@@ -5,7 +5,12 @@ export const categories = Object.keys(labels) as Category[];
 export const date = (value: string | null) =>
   value ? new Date(value).toLocaleString() : "No measurement yet";
 export function useAPI<T>(path: string) {
-  return useQuery({ queryKey: [path], queryFn: () => api<T>(path) });
+  return useQuery({
+    queryKey: [path],
+    queryFn: () => api<T>(path),
+    // Only the synthetic filming bin needs to show one-second demo steps.
+    refetchInterval: /^\/stations\/filming-demo(?:\/|$)/.test(path) ? 500 : 5000,
+  });
 }
 export type Summary = {
   stations: number;

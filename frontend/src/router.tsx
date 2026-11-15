@@ -56,6 +56,11 @@ const records = createRoute({
   }),
   component: lazyRouteComponent(() => import("@/pages/records"), "RecordsPage"),
 });
+const collectionRoutes = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/routes",
+  component: lazyRouteComponent(() => import("@/pages/routes"), "RoutesPage"),
+});
 const inference = createRoute({
   getParentRoute: () => rootRoute,
   path: "/inference",
@@ -98,6 +103,7 @@ export const router = createRouter({
     bins,
     bin,
     records,
+    collectionRoutes,
     legacyStations,
     legacyStation,
     legacyCollections,

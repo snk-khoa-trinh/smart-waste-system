@@ -97,3 +97,38 @@ Personal/retired calibration and bring-up wrappers are kept locally in ignored
 The old per-item `sort-prototype.py` bridge and its obsolete bridge-only tests
 were removed. Historical commands in older hardware notes are not current setup
 instructions; use this guide and the firmware README.
+
+## Staged filming
+
+[Filming handoff](../docs/filming-handoff.md) covers separate insertion shots,
+scripted motor takes and bench fill monitoring. `film-cycle.sh` accepts
+`recyclable`, `non_recyclable` or `e_waste`, plus `--wiring-confirmed` and
+`--clearance-confirmed`. It creates a provider=filming record, runs one bounded
+USB cycle and reports its acknowledged outcome; it does not use camera/inlet or
+paid inference. Disable auto and finish pending work first. Errors never replay
+motion; local uncertainty journals are in ignored `.hardware-backups/filming/`.
+Requires the updated backend; reverse motion requires updated station firmware.
+
+`film-capture.sh CATEGORY --auto-disabled-confirmed --empty-confirmed` observes one
+inlet drop, fetches its exact retained JPEG and uploads it against the latest
+completed matching S11 filming record (`--event-id UUID` selects a specific take).
+It uses the private camera control header in-process, never a secret CLI argument.
+Local JPEG/JSON copies stay under ignored `.hardware-backups/filming/captures/`.
+Keep station auto off; wait for READY before inserting. It never classifies or
+moves servos. It disarms the camera after the photo, including failure paths.
+
+`film-fill.sh --prepare` creates/resets the separate synthetic demo bin at0%.
+Open `/bins/filming-demo`, start recording, then `film-fill.sh` sends0..50% in
+10-point increments every second. Options: `--category`, `--end`, `--step`,
+`--interval`. It stops after the finite sequence and never writes physical-bin
+telemetry. The demo detail/history poll every500ms; other views poll normally.
+The [filming handoff](../docs/filming-handoff.md) covers backend migration/rebuild,
+image persistence, staged-image provenance and matching footage to records.
+
+The current additive `seed-locations.sh` also adds Riverside Complex (8 floors,
+96 bins), preserving existing IDs/data. `update-inference-api.sh` builds both API and initializer, starts the existing
+database, applies migrations plus the additive seed, then starts the API. This
+keeps the named initializer compatible with the current Alembic revision.
+`seed-locations.sh` remains useful for applying only a later seed edit.
+No additional simulator process is needed: the planner's explicitly selected demo
+scenario is read-only. See [routing setup](../docs/collection-routing.md).

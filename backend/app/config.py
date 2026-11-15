@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     }
     max_upload_bytes: int = Field(default=2_000_000, gt=0)
     store_images: bool = False
+    filming_image_dir: str = "images/filming"
     heartbeat_expiry: int = Field(default=90, gt=0)
     mqtt_host: str = "localhost"
     mqtt_port: int = 1883

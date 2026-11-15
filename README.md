@@ -5,7 +5,9 @@ ESP32-CAM detects an inlet arrival and retains a JPEG. A separate ESP32 DevKit
 asks the FastAPI backend to classify that image through Roboflow, then controls
 the chute and flap for accepted categories. The backend records classification
 and physical outcomes separately. MQTT carries board heartbeats and fill readings;
-the React dashboard shows bins, collection tasks and records.
+the React dashboard shows bins, collection tasks, cleaner routes and records.
+Fresh fill readings identify collection stops; a schematic walking graph helps
+order those stops with less backtracking.
 
 ![SWS architecture: inlet and camera, station controller, inference API, servos, MQTT, database and dashboard.](docs/assets/system-architecture.svg)
 
@@ -57,6 +59,17 @@ sudo docker compose \
 Frontend source reloads automatically. Rebuild after dependency changes.
 The frontend uses Vite, React, TypeScript, TanStack Router/Query, shadcn/ui and
 Tailwind. [Frontend guide](frontend/README.md) covers local development and checks.
+
+## Plan cleaner collection routes
+
+Open **Collection route** (`/routes`). Select **Riverside Complex** for the new
+8-floor,96-bin example, then choose **Demo fill scenario** to explore routing
+without changing hardware readings. Live mode uses fresh sensor readings at the
+collection threshold. Plans follow modeled corridors and floor connections,
+return to the start, and compare travel against the same stops in bin-ID order.
+Small plans are exact for the model; large plans use labelled heuristics.
+[Routing guide](docs/collection-routing.md) covers setup, algorithms, assumptions,
+validation and the additional demo-video scene.
 
 ## Configure and operate physical boards
 

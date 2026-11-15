@@ -14,3 +14,8 @@ Read [root baseline](../AGENTS.md) and [documentation map](README.md).
 - For documentation-only edits validate links and `git diff --check`; execute
   commands only when appropriate and never use paid inference or motors just to
   check a code block. Cross-check command paths against the current tree.
+
+Cleaner routing is now implemented; keep [routing](collection-routing.md),
+architecture/API, building-preview guide and filming handoff consistent. Distinguish
+request-only synthetic route scenarios from persisted telemetry, and schematic
+estimates/exact small tours from heuristic large tours and surveyed deployments.

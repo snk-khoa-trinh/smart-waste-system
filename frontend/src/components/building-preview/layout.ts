@@ -22,7 +22,23 @@ const mallRooms = [
   ["Retail gallery", "Arcade", "Shopping area", "Cinema lobby"],
   ["Dining terrace", "Events hall", "Restaurants", "Lounge"],
 ];
+export function buildingFeatures(buildingId: string) {
+  return buildingId === "tower"
+    ? {
+        elevator: { x: 44, y: 55, width: 12, depth: 10 },
+        stairs: { x: 44, y: 16, width: 12, depth: 8 },
+      }
+    : { elevator, stairs };
+}
 export function floorRooms(buildingId: string, level: number): Room[] {
+  if (buildingId === "tower") {
+    return [
+      { x: 22, y: 28, width: 16, depth: 16, name: "West wing A" },
+      { x: 62, y: 28, width: 16, depth: 16, name: "East wing A" },
+      { x: 22, y: 48, width: 16, depth: 16, name: "West wing B" },
+      { x: 62, y: 48, width: 16, depth: 16, name: "East wing B" },
+    ];
+  }
   const floors = buildingId === "mall" ? mallRooms : campusRooms;
   const names = floors[level % floors.length];
   return roomRects.map((rect, index) => ({ ...rect, name: names[index] }));

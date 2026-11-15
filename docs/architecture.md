@@ -1,6 +1,6 @@
 # System architecture
 
-This is a local monitoring and sorting demonstration. The API and MQTT worker share a small Python application and a PostgreSQL database. The frontend polls API data every five seconds. Twelve seeded bins span five floors across Innovation Campus and Central Mall; the seed creates identity/configuration only, not fabricated physical readings.
+This is a local monitoring and sorting demonstration. The API and MQTT worker share a small Python application and a PostgreSQL database. The frontend polls API data every five seconds. 108 seeded bins span13 floors across Innovation Campus, Central Mall and Riverside Complex; the seed creates identity/configuration only, not fabricated physical readings.
 
 ![Smart Waste System architecture](assets/system-architecture.svg)
 
@@ -41,4 +41,31 @@ sorting records. It performs inference only and never commands hardware.
 
 ## Future work
 
-Indoor walking graphs/route optimization, fill forecasting, production authentication/roles, TLS/public deployment, hardware sensor calibration, power validation, camera upload reliability and actuator interlocks are future work. No route optimization, forecasting or AI insights are implemented. Add retention/archival policies, durable broker sessions, schema enforcement for authenticated per-device credentials and concurrent outcome conflict handling before production scaling.
+Surveyed walking maps, dynamic lift/corridor availability, cart capacity, multiple-cleaner scheduling, fill forecasting, production authentication/roles, TLS/public deployment, hardware sensor calibration, power validation, camera upload reliability and actuator interlocks are future work. The current single-cleaner schematic route planner is implemented; forecasting and AI insights are not. Add retention/archival policies, durable broker sessions, schema enforcement for authenticated per-device credentials and concurrent outcome conflict handling before production scaling.
+
+## Staged filming boundary
+
+The optional laptop filming helper sends one bounded USB command with auto off.
+It bypasses capture/inference deliberately, records the operator-selected category
+through `/api/filming/events`, and reports a separate acknowledged command outcome.
+Records are labelled provider=filming, model=operator-selected and simulated=true;
+no real classification or telemetry is fabricated. A USB-only reverse profile
+reuses the same two motor positions for a non-recyclable concept shot. It does not
+change autonomous category routing or add a third mechanical destination.
+
+Separately staged inlet images can be attached to filming events. Capture metadata
+(arrival ID, checksum, save time) persists in `filming_captures`, with JPEG bytes
+in the API's persistent filming-images volume. These later photos are not the
+frames used for the earlier motor take or a model prediction. A separate reserved
+`filming-demo` bin supports finite synthetic fill ramps via normal ingestion;
+physical-bin telemetry is never overwritten for a UI animation.
+
+## Cleaner route planning
+
+`POST /api/routes/plan` reads fill and collection records, selects eligible bins,
+and optimizes a round trip over explicit corridor, door and elevator/stair links.
+Dijkstra supplies pairwise travel costs; Held–Karp solves up to12 stops exactly,
+with nearest-neighbour/2-opt for larger selections. Route responses contain floor
+paths, stop order, skipped bins and a same-stop baseline comparison. No hardware
+command or inference request is involved. Demo fill values exist only in the
+response; physical telemetry is preserved. See [routing](collection-routing.md).

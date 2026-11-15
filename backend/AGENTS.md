@@ -15,3 +15,10 @@ Read [root baseline](../AGENTS.md) and [backend guide](README.md).
   fixtures; validation must not consume real inference credits or touch hardware.
 - Run the Ruff and pytest commands in [README](README.md). Use a temporary database
   for migration checks rather than the user's existing database.
+
+- Route planning must remain read-only: no inferred empty readings, online board
+  status, collection completion or paid provider calls. Keep live freshness/source
+  and post-collection suppression rules intact. Exact claims apply only to the
+  bounded solver on the schematic graph; large tours are labelled heuristic.
+- Changes to seed coordinates or walking links must update the frontend geometry
+  and obstacle/path tests; never snap an unmapped bin through a room or atrium.

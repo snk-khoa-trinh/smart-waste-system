@@ -34,6 +34,11 @@ int main() {
     assert(cycleStep(route, 5).classifierUs == 700);
     assert(cycleStep(route, 5).openerUs == 1800);
   }
+  for (int phase = 0; phase < cycleCount; ++phase) {
+    const auto s = cycleStep(2, phase);
+    assert(s.classifierUs == (phase == 0 ? 0u : phase == 1 || phase == 5 ? 2000u : 700u));
+    assert(s.openerUs == (phase == 3 ? 700u : 1800u));
+  }
   uint32_t sweepTotal = 0;
   const int sweepAngles[] = {0, 30, 60, 120, 150, 180, 90};
   for (int i = 0; i < sweepCount; ++i) {

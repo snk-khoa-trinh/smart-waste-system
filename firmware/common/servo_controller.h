@@ -83,7 +83,10 @@ void advance(void*) {
       active = false;
       holdingHome = commandedUs[0] == ServoBenchPlan::classifierHomeUs &&
                     commandedUs[1] == ServoBenchPlan::openerClosedUs;
-      if (!holdingHome) { error = "Final home commands missing"; outputOff(); }
+      const uint32_t expected = homingProfile ? ServoBenchPlan::classifierHomeUs : ServoBenchPlan::cycleReturnUs(cycleRoute);
+      if (commandedUs[0] != expected || commandedUs[1] != ServoBenchPlan::openerClosedUs) {
+        error = "Final return commands missing"; outputOff();
+      }
     } else outputOff(); // Manual calibration keeps its bounded PWM-off behavior.
     if (!homingProfile && error.isEmpty()) ++completed;
   } else if (!applyStep()) {
@@ -125,7 +128,7 @@ bool start(int servo, uint32_t diagnosticPulse = 0, int offset = 0, bool sweep =
   if (!available || servo < 0 || servo > 1 ||
       (diagnosticPulse && !ServoBenchPlan::validFixedPulse(diagnosticPulse)) ||
       (offset && !ServoBenchPlan::validRangeOffset(offset)) || (offset && diagnosticPulse) ||
-      (sweep && (offset || diagnosticPulse || servo != 0)) || route < -1 || route > 1 ||
+      (sweep && (offset || diagnosticPulse || servo != 0)) || route < -1 || route > 2 ||
       (route >= 0 && (servo != 0 || diagnosticPulse || offset || sweep || home)) ||
       (home && (servo != 0 || diagnosticPulse || offset || sweep))) return false;
   xSemaphoreTake(lock, portMAX_DELAY);
@@ -178,6 +181,7 @@ void status(JsonDocument& body) {
   if (lock) xSemaphoreTake(lock, portMAX_DELAY);
   body["servo_bench_available"] = available;
   body["sorting_cycle_supported"] = true;
+  body["filming_reverse_supported"] = true;
   body["classifier_home_us"] = ServoBenchPlan::classifierHomeUs;
   body["classifier_side_us"] = ServoBenchPlan::classifierSideUs;
   body["opener_closed_us"] = ServoBenchPlan::openerClosedUs;
@@ -197,7 +201,7 @@ void status(JsonDocument& body) {
     fixedPulse ? ServoBenchPlan::fixed(fixedPulse).holdMs : ServoBenchPlan::durationMs(selected);
   body["servo_bench_profile"] = homingProfile ? "startup-home" : cycleRoute >= 0 ? "sorting-cycle" :
     sweeping ? "endpoint-sweep" : rangeOffset ? "center-range" : fixedPulse ? "fixed-pulse" : "nominal-positions";
-  body["sorting_route"] = cycleRoute < 0 ? "none" : cycleRoute == 0 ? "home" : "side";
+  body["sorting_route"] = cycleRoute < 0 ? "none" : cycleRoute == 0 ? "home" : cycleRoute == 1 ? "side" : "reverse";
   body["servo_bench_range_offset"] = rangeOffset;
   if (active && pairedProfile()) {
     const auto step = currentPair();

@@ -49,6 +49,21 @@ class Outcome(BaseModel):
     simulated: bool = False
 
 
+class FilmingEventInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    request_id: UUID
+    station_id: str
+    device_id: str
+    category: Category
+
+
+class FilmingFillInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    message_id: UUID
+    category: Category
+    fill: float = Field(ge=0, le=100, allow_inf_nan=False)
+
+
 class SortingOutcome(Envelope):
     event_id: UUID
     outcome: Literal["completed", "failed", "disabled"]
@@ -59,3 +74,12 @@ class CollectionInput(BaseModel):
     category: Category
     operator: str = Field(min_length=1, max_length=100)
     note: str = Field(default="", max_length=500)
+
+
+class RoutePlanInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    building_id: Literal["campus", "mall", "tower"]
+    source: Literal["live", "demo"] = "live"
+    threshold: int = Field(default=80, ge=1, le=100)
+    travel_mode: Literal["elevator", "stairs"] = "elevator"
+    start_node_id: str | None = Field(default=None, max_length=128)

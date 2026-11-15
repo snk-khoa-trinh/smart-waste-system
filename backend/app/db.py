@@ -102,5 +102,13 @@ class Collection(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
 
 
+class FilmingCapture(Base):
+    __tablename__ = "filming_captures"
+    event_id: Mapped[str] = mapped_column(ForeignKey("sorting_events.id"), primary_key=True)
+    arrival_id: Mapped[str]
+    sha256: Mapped[str]
+    saved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
 engine = create_engine(settings.database_url)
 Session = sessionmaker(engine, expire_on_commit=False)

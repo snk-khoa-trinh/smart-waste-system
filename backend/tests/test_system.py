@@ -210,11 +210,11 @@ def test_mqtt_outcome_and_role_checks(system):
 def test_seed_is_repeatable(system):
     client, db = system
     seed(db)
-    assert len(client.get("/api/stations").json()) == 12
-    assert len(client.get("/api/floors").json()) == 5
+    assert len(client.get("/api/stations").json()) == 108
+    assert len(client.get("/api/floors").json()) == 13
     assert client.get("/api/ready").status_code == 200
     assert client.get("/api/stations/missing").status_code == 404
-    assert {building["id"] for building in client.get("/api/buildings").json()} == {"campus", "mall"}
+    assert {building["id"] for building in client.get("/api/buildings").json()} == {"campus", "mall", "tower"}
     floors = client.get("/api/floors").json()
     assert {floor["building_id"] for floor in floors if floor["id"].startswith("mall-floor-")} == {"mall"}
     mall = client.get("/api/stations/m11").json()
@@ -414,3 +414,113 @@ def test_inference_lab_is_independent_and_does_not_record_sorting(system):
     assert client.post("/api/inference/test", files={"image": ("big.jpg", b"x" * (settings.max_upload_bytes + 1), "image/jpeg")}).status_code == 413
     assert client.post("/api/inference/test", data={"scenario": "timeout"},
                        files={"image": ("test.jpg", jpeg(), "image/jpeg")}).status_code == 504
+
+
+def test_filming_records_are_explicit_and_idempotent(system, monkeypatch):
+    client, db = system
+
+    def forbidden():
+        pytest.fail("Filming must never call inference")
+
+    monkeypatch.setattr("app.main.provider", forbidden)
+    for category in ["recyclable", "non_recyclable", "e_waste"]:
+        body = dict(request_id=str(uuid4()), station_id="s11", device_id="s11-cam", category=category)
+        response = client.post("/api/filming/events", json=body)
+        assert response.status_code == 200
+        event = response.json()
+        assert event["decision"] == category
+        assert event["provider"] == "filming" and event["model"] == "operator-selected"
+        assert event["confidence"] is None and event["simulated"] is True
+        assert event["outcome"] is None
+        assert client.post("/api/filming/events", json=body).json() == event
+        assert client.post("/api/filming/events", json=body | {"category": "unknown"}).status_code == 422
+        other = "e_waste" if category != "e_waste" else "recyclable"
+        assert client.post("/api/filming/events", json=body | {"category": other}).status_code == 409
+        outcome = {"event_id": body["request_id"], "outcome": "completed", "simulated": True}
+        assert client.post("/api/outcomes", json=outcome).json()["outcome"] == "completed"
+        assert client.post("/api/outcomes", json=outcome | {"outcome": "failed"}).status_code == 409
+    assert db.scalar(select(func.count()).select_from(SortingEvent)) == 3
+    assert client.post("/api/filming/events", json=body | {"request_id": str(uuid4()), "device_id": "s11-monitor"}).status_code == 422
+
+
+def test_filming_capture_validates_preserves_and_downloads(system, monkeypatch, tmp_path):
+    client, db = system
+    monkeypatch.setattr(settings, "filming_image_dir", str(tmp_path / "images"))
+    body = dict(request_id=str(uuid4()), station_id="s11", device_id="s11-cam", category="e_waste")
+    event = client.post("/api/filming/events", json=body).json()
+    url = f"/api/filming/events/{event['id']}/image"
+    assert client.get(url).status_code == 404
+    arrival = str(uuid4())
+    image = jpeg()
+    response = client.post(url, data={"arrival_id": arrival}, files={"image": ("input.jpg", image, "image/jpeg")})
+    assert response.status_code == 200
+    metadata = response.json()
+    assert metadata["arrival_id"] == arrival and metadata["event_id"] == event["id"]
+    assert client.get(url).content == image
+    assert client.get(url.replace("/image", "/capture")).json() == metadata
+    assert client.post(url, data={"arrival_id": arrival}, files={"image": ("input.jpg", image)}).json() == metadata
+    assert client.post(url, data={"arrival_id": str(uuid4())}, files={"image": ("input.jpg", image)}).status_code == 409
+    assert client.post(url, data={"arrival_id": arrival}, files={"image": ("bad.jpg", b"not JPEG")}).status_code == 422
+    real = classify(client).json()
+    assert client.post(f"/api/filming/events/{real['id']}/image", data={"arrival_id": arrival}, files={"image": ("input.jpg", image)}).status_code == 404
+    assert client.get(url).content == image
+    assert next(row for row in client.get("/api/events?station_id=s11").json() if row["id"] == event["id"])["outcome"] is None
+
+
+def test_filming_fill_never_changes_physical_bin(system):
+    client, db = system
+    before = client.get("/api/stations/s11").json()
+    mid = str(uuid4())
+    for value in range(0, 51, 10):
+        response = client.post("/api/filming/fill", json={"message_id": str(uuid4()), "category": "recyclable", "fill": value})
+        assert response.status_code == 200
+        demo = response.json()
+        assert demo["id"] == "filming-demo"
+        reading = next(c for c in demo["compartments"] if c["category"] == "recyclable")
+        assert reading["fill"] == value and reading["source"] == "simulated"
+    request = {"message_id": mid, "category": "e_waste", "fill": 20}
+    assert client.post("/api/filming/fill", json=request).status_code == 200
+    assert client.post("/api/filming/fill", json=request).status_code == 200
+    assert client.get("/api/stations/s11").json() == before
+    readings = client.get("/api/stations/filming-demo/telemetry").json()
+    assert len(readings) == 7 and all(r["source"] == "simulated" for r in readings)
+    assert client.post("/api/filming/fill", json=request | {"fill": 101}).status_code == 422
+    assert client.post("/api/filming/fill", json=request | {"station_id": "s11"}).status_code == 422
+
+
+def test_filming_capture_migration(monkeypatch, tmp_path):
+    from pathlib import Path
+
+    from alembic import command
+    from alembic.config import Config
+    from sqlalchemy import inspect
+
+    engine = create_engine(f"sqlite:///{tmp_path / 'migration.db'}")
+    monkeypatch.setattr("app.db.engine", engine)
+    config = Config()
+    config.set_main_option("script_location", str(Path(__file__).resolve().parents[1] / "migrations"))
+    command.upgrade(config, "0001")
+    command.upgrade(config, "head")
+    assert "filming_captures" in inspect(engine).get_table_names()
+    command.downgrade(config, "0001")
+    assert "filming_captures" not in inspect(engine).get_table_names()
+    assert "sorting_events" in inspect(engine).get_table_names()
+    engine.dispose()
+
+
+def test_route_api_validation_and_demo_labels(system, monkeypatch):
+    client, db = system
+
+    def forbidden():
+        pytest.fail("Route planning must never call inference")
+
+    monkeypatch.setattr("app.main.provider", forbidden)
+    response = client.post("/api/routes/plan", json={"building_id": "tower", "source": "demo"})
+    assert response.status_code == 200
+    result = response.json()
+    assert result["source"] == "demo" and result["estimated"] is True
+    assert result["summary"]["total_bins"] == 96
+    assert client.post("/api/routes/plan", json={"building_id": "tower"}).json()["summary"]["stops"] == 0
+    for body in [{"building_id": "unknown"}, {"building_id": "tower", "threshold": 101},
+                 {"building_id": "tower", "source": "sensor"}, {"building_id": "tower", "travel_mode": "fly"}]:
+        assert client.post("/api/routes/plan", json=body).status_code == 422

@@ -1,4 +1,4 @@
-flowchart LR
+flowchart TB
   Inlet["Inlet sensor"] --> Camera["ESP32-CAM: retained JPEG"]
   Camera --> Brain["DevKit: station controller"]
   Brain --> API["FastAPI"]
@@ -10,3 +10,5 @@ flowchart LR
   MQTT --> DB[("PostgreSQL")]
   API <--> DB
   UI["Vite dashboard"] <--> API
+  API <--> Planner["Cleaner routes: walk graph and stop order"]
+  Planner --> Cleaner["Cleaner itinerary"]

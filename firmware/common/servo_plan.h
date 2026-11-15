@@ -21,7 +21,7 @@ constexpr uint32_t classifierHomeUs = 700;
 constexpr uint32_t classifierSideUs = 2000;
 constexpr uint32_t openerClosedUs = 1800;
 constexpr uint32_t openerOpenUs = 700;
-// Close flap, position chute, open, close, return home. Both outputs then stop.
+// Close flap, position chute, open, close, return. Final PWM remains commanded.
 struct CycleStep { uint32_t classifierUs; uint32_t openerUs; uint32_t holdMs; };
 constexpr int homeCount = 2;
 constexpr uint32_t homeDurationMs = 2000;
@@ -30,8 +30,11 @@ constexpr CycleStep homeStep(int phase) {
 }
 constexpr int cycleCount = 6;
 constexpr uint32_t cycleDurationMs = 8000;
+// Route 2 is a USB-only filming reversal; autonomous routing never selects it.
+constexpr uint32_t cycleReturnUs(int route) { return route == 2 ? classifierSideUs : classifierHomeUs; }
 constexpr CycleStep cycleStep(int route, int phase) {
-  return {phase == 0 ? 0u : phase == 1 || phase == 5 || route == 0 ? classifierHomeUs : classifierSideUs,
+  return {phase == 0 ? 0u : phase == 1 || phase == 5 ? cycleReturnUs(route) :
+          route == 1 ? classifierSideUs : classifierHomeUs,
           phase == 3 ? openerOpenUs : openerClosedUs,
           static_cast<uint32_t>(phase == 2 || phase == 3 ? 2000 : 1000)};
 }

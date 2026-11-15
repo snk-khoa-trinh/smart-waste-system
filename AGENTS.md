@@ -12,6 +12,10 @@ contracts described in [architecture](docs/architecture.md) and [API](docs/api.m
 
 - FastAPI/SQLAlchemy/Alembic own API, persistence and inference normalization.
   MQTT worker ingestion is separate from HTTP request handling.
+- Cleaner routing is a read-only API in `backend/app/routing.py`. Keep seeded bin
+  positions, corridor/door links and frontend 2D/3D geometry in sync; label
+  schematic costs, demo sources and large-tour heuristics honestly. See
+  [routing contracts](docs/collection-routing.md).
 - Frontend is Vite + React + TypeScript, TanStack Router/Query, shadcn/ui and
   Tailwind. Use Nub 0.9.0, not npm or Bun; preserve `nub.lock`.
 - Use uv for Python and `uv tool run --from platformio==6.2.0 pio ...` for firmware.

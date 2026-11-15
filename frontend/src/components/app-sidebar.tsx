@@ -2,6 +2,7 @@ import { PrototypeStatus } from "@/components/prototype-status";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
+  Route,
   History,
   FlaskConical,
   UserRound,
@@ -27,6 +28,7 @@ const navigation = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/bins", label: "Bins", icon: Trash2 },
   { to: "/records", label: "Records", icon: History },
+  { to: "/routes", label: "Collection route", icon: Route },
 ] as const;
 export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });

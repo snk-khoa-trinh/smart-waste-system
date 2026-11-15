@@ -2,52 +2,72 @@ import { expect, test } from "@playwright/test";
 const buildings = [
   { id: "campus", name: "Innovation Campus" },
   { id: "mall", name: "Central Mall" },
+  { id: "tower", name: "Riverside Complex" },
 ];
 const floors = buildings.flatMap((building) =>
-  Array.from({ length: building.id === "mall" ? 3 : 2 }, (_, i) => ({
-    id: `${building.id === "campus" ? "floor" : "mall-floor"}-${i + 1}`,
-    building_id: building.id,
-    name: `Level 0${i + 1}`,
-  })),
+  Array.from(
+    { length: building.id === "tower" ? 8 : building.id === "mall" ? 3 : 2 },
+    (_, i) => ({
+      id: `${building.id === "campus" ? "floor" : building.id === "tower" ? "tower-floor" : "mall-floor"}-${i + 1}`,
+      building_id: building.id,
+      name: `Level 0${i + 1}`,
+    }),
+  ),
 );
 const stations = floors.flatMap((floor) => {
   const level = Number(floor.id.split("-").at(-1));
   const mall = floor.building_id === "mall";
-  return Array.from({ length: mall && level < 3 ? 3 : 2 }, (_, i) => {
-    const id = `${mall ? "m" : "s"}${level}${i + 1}`;
-    return {
-      id,
-      name: `${mall ? "Mall" : "Campus"} bin ${level}${i + 1}`,
-      floor_id: floor.id,
-      x: i === 0 ? 25 : 72,
-      y: i < 2 ? (level === 1 ? 35 : 65) : level === 1 ? 65 : 35,
-      compartments: ["recyclable", "non_recyclable", "e_waste"].map(
-        (category) => ({
-          category,
-          source:
-            id === "s11" && category === "recyclable" ? "sensor" : "simulated",
-          fill: 40,
-          quality: "valid",
-          stale: false,
-          measured_at: new Date().toISOString(),
-        }),
-      ),
-      devices: [
-        {
-          id: `${id}-cam`,
-          role: "camera_sorter",
-          online: true,
-          last_seen: new Date().toISOString(),
-        },
-        {
-          id: `${id}-monitor`,
-          role: "fill_monitor",
-          online: true,
-          last_seen: new Date().toISOString(),
-        },
-      ],
-    };
-  });
+  const tower = floor.building_id === "tower";
+  return Array.from(
+    { length: tower ? 12 : mall && level < 3 ? 3 : 2 },
+    (_, i) => {
+      const id = tower
+        ? `t${String(level).padStart(2, "0")}${String(i + 1).padStart(2, "0")}`
+        : `${mall ? "m" : "s"}${level}${i + 1}`;
+      return {
+        id,
+        name: `${tower ? "Riverside" : mall ? "Mall" : "Campus"} bin ${level}${i + 1}`,
+        floor_id: floor.id,
+        x: tower ? [20, 80, 40, 60][i % 4] : i === 0 ? 25 : 72,
+        y: tower
+          ? [26, 46, 66][Math.floor(i / 4)]
+          : i < 2
+            ? level === 1
+              ? 35
+              : 65
+            : level === 1
+              ? 65
+              : 35,
+        compartments: ["recyclable", "non_recyclable", "e_waste"].map(
+          (category) => ({
+            category,
+            source:
+              id === "s11" && category === "recyclable"
+                ? "sensor"
+                : "simulated",
+            fill: 40,
+            quality: "valid",
+            stale: false,
+            measured_at: new Date().toISOString(),
+          }),
+        ),
+        devices: [
+          {
+            id: `${id}-cam`,
+            role: "camera_sorter",
+            online: true,
+            last_seen: new Date().toISOString(),
+          },
+          {
+            id: `${id}-monitor`,
+            role: "fill_monitor",
+            online: true,
+            last_seen: new Date().toISOString(),
+          },
+        ],
+      };
+    },
+  );
 });
 test.use({
   launchOptions: {
@@ -142,7 +162,7 @@ test("3D renders, highlights and selects bins, rotates, zooms and isolates floor
   const canvas = preview.locator('canvas[data-renderer="webgl"]');
   await expect(canvas).toBeVisible({ timeout: 30000 });
   const bin = preview.getByRole("button", {
-    name: "Select 3D bin Campus bin 12",
+    name: "Select 3D bin Campus bin 12 (S12)",
     exact: true,
   });
   await expect(bin).toBeVisible({ timeout: 15000 });
@@ -225,7 +245,7 @@ test.describe("mobile building preview", () => {
     const canvas = preview.locator('canvas[data-renderer="webgl"]');
     await expect(canvas).toBeVisible({ timeout: 30000 });
     const bin = preview.getByRole("button", {
-      name: "Select 3D bin Campus bin 12",
+      name: "Select 3D bin Campus bin 12 (S12)",
       exact: true,
     });
     await bin.tap();
@@ -244,6 +264,8 @@ test.describe("mobile building preview", () => {
         return bounds.x + bounds.width;
       })
       .toBeLessThanOrEqual(375);
+    await details.getByRole("button", {name: "Close bin details"}).tap();
+    await expect(details).not.toBeVisible();
     await preview.getByRole("button", { name: "Zoom out", exact: true }).tap();
     expect(
       await page.evaluate(
@@ -323,4 +345,27 @@ test("bin popovers replace overview cards and link to the selected bin", async (
   await expect(
     page.getByRole("heading", { name: "Campus bin 12", exact: true }),
   ).toBeVisible();
+});
+
+test("Riverside large building shows eight floors and isolates twelve bin labels", async ({
+  page,
+}) => {
+  test.setTimeout(60000);
+  await page.goto("/");
+  const preview = page.getByRole("region", { name: "Building preview" });
+  await preview
+    .getByRole("combobox", { name: "Building", exact: true })
+    .click();
+  await page
+    .getByRole("option", { name: "Riverside Complex", exact: true })
+    .click();
+  await expect(preview.locator("svg.floor-plan-svg .plan-bin")).toHaveCount(12);
+  await preview.getByRole("tab", { name: "3D", exact: true }).click();
+  await expect(preview.locator('canvas[data-renderer="webgl"]')).toBeVisible();
+  await expect(preview.locator(".model-bin-label")).toHaveCount(0);
+  await expect(preview.getByText("Level 08", { exact: true })).toBeVisible();
+  await preview.getByRole("combobox", { name: "Floor", exact: true }).click();
+  await page.getByRole("option", { name: "Level 08", exact: true }).click();
+  await expect(preview.locator(".model-bin-label")).toHaveCount(12);
+  await expect(preview.locator('[data-bin-id="t0801"]')).toBeVisible();
 });

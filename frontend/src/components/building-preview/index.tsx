@@ -237,7 +237,8 @@ export function BuildingPreview(
             Schematic layouts using shared bin coordinates. Drag the 3D model to
             rotate; scroll or pinch to zoom. Select a bin for readings and its
             detail page. Entrances, elevators and stairs are marked on the
-            model.
+            model. Large buildings show floor labels at overview scale; select a
+            floor to show all its bin labels.
           </InfoTooltip>
         </div>
       </div>

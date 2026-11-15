@@ -7,17 +7,30 @@ from uuid import UUID, uuid4
 import httpx
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy import select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session as DBSession
 
 from .config import settings
-from .contracts import CollectionInput, Outcome
-from .db import Building, Collection, Compartment, Device, Floor, Session, SortingEvent, Station, Telemetry, now
+from .contracts import CollectionInput, FilmingEventInput, FilmingFillInput, Outcome, RoutePlanInput
+from .db import (
+    Building,
+    Collection,
+    Compartment,
+    Device,
+    FilmingCapture,
+    Floor,
+    Session,
+    SortingEvent,
+    Station,
+    Telemetry,
+    now,
+)
 from .inference import normalize, provider
-from .ingest import report_outcome, utc
+from .ingest import ingest, report_outcome, utc
+from .routing import plan_collection
 
 app = FastAPI(title="Smart Waste API", version="0.1.0")
 
@@ -257,6 +270,134 @@ def outcome(body: Outcome, db: DBSession = DB):
     return serialize(event)
 
 
+@app.post("/api/filming/events")
+def filming_event(body: FilmingEventInput, db: DBSession = DB):
+    """Operator-selected demonstration record; never inference or motor control."""
+    require_station(db, body.station_id)
+    device = db.get(Device, body.device_id)
+    if not device or device.station_id != body.station_id or device.role != "camera_sorter":
+        raise HTTPException(422, "Camera/sorter device required")
+    fingerprint = hashlib.sha256(f"filming:{body.station_id}:{body.device_id}:{body.category}".encode()).hexdigest()
+    existing = db.get(SortingEvent, str(body.request_id))
+    if existing:
+        if existing.fingerprint != fingerprint:
+            raise HTTPException(409, "Request ID reused with different input")
+        return serialize(existing)
+    event = SortingEvent(
+        id=str(body.request_id), station_id=body.station_id, device_id=body.device_id,
+        fingerprint=fingerprint, decision=body.category, confidence=None,
+        raw_label=f"Scripted {body.category}", provider="filming", model="operator-selected",
+        reason="Staged motor demonstration; category selected by operator, no image inference. "
+               "Outcome confirms command sequence only; visually check item destination.",
+        simulated=True,
+    )
+    db.add(event)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = db.get(SortingEvent, str(body.request_id))
+        if not existing or existing.fingerprint != fingerprint:
+            raise HTTPException(409, "Conflicting filming request") from None
+        return serialize(existing)
+    return serialize(event)
+
+
+def require_filming_event(db, event_id):
+    event = db.get(SortingEvent, str(event_id))
+    if not event or event.provider != "filming":
+        raise HTTPException(404, "Filming event not found")
+    return event
+
+
+def capture_data(capture):
+    return {**serialize(capture), "image_url": f"/api/filming/events/{capture.event_id}/image",
+            "note": "Separately staged inlet capture; not the image used for an automatic classification."}
+
+
+@app.post("/api/filming/events/{event_id}/image")
+async def save_filming_image(
+    event_id: UUID, arrival_id: UUID = Form(...), image: UploadFile = File(...), db: DBSession = DB,
+):
+    require_filming_event(db, event_id)
+    data = await read_jpeg(image)
+    digest = hashlib.sha256(data).hexdigest()
+    existing = db.get(FilmingCapture, str(event_id))
+    if existing and (existing.sha256 != digest or existing.arrival_id != str(arrival_id)):
+        raise HTTPException(409, "Filming image already attached; original preserved")
+    directory = Path(settings.filming_image_dir)
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{event_id}-{digest}.jpg"
+    # Content-addressed filenames never replace a different event image.
+    if not path.exists():
+        temporary = directory / f".{uuid4()}.tmp"
+        try:
+            temporary.write_bytes(data)
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+    if existing:
+        return capture_data(existing)
+    capture = FilmingCapture(event_id=str(event_id), arrival_id=str(arrival_id), sha256=digest)
+    db.add(capture)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        existing = db.get(FilmingCapture, str(event_id))
+        if not existing or existing.sha256 != digest or existing.arrival_id != str(arrival_id):
+            raise HTTPException(409, "Conflicting filming image; original preserved") from None
+        return capture_data(existing)
+    return capture_data(capture)
+
+
+@app.get("/api/filming/events/{event_id}/capture")
+def filming_capture(event_id: UUID, db: DBSession = DB):
+    require_filming_event(db, event_id)
+    capture = db.get(FilmingCapture, str(event_id))
+    if not capture:
+        raise HTTPException(404, "No filming image attached")
+    return capture_data(capture)
+
+
+@app.get("/api/filming/events/{event_id}/image")
+def filming_image(event_id: UUID, db: DBSession = DB):
+    metadata = filming_capture(event_id, db)
+    path = Path(settings.filming_image_dir) / f"{event_id}-{metadata['sha256']}.jpg"
+    if not path.is_file():
+        raise HTTPException(404, "Filming image file unavailable")
+    return FileResponse(path, media_type="image/jpeg", headers={"Cache-Control": "no-store"})
+
+
+@app.post("/api/filming/fill")
+def filming_fill(body: FilmingFillInput, db: DBSession = DB):
+    # Reserved separate identity: never overwrite a physical bin's current reading.
+    sid, did = "filming-demo", "filming-demo-monitor"
+    station = db.get(Station, sid)
+    if not station:
+        if not db.get(Floor, "floor-1"):
+            raise HTTPException(409, "Seed the campus before creating the filming demo bin")
+        db.add(Station(id=sid, floor_id="floor-1", name="Filming demo (synthetic)", x=50, y=75))
+        db.flush()
+        db.add(Device(id=did, station_id=sid, role="fill_monitor"))
+        for category in ("recyclable", "non_recyclable", "e_waste"):
+            db.add(Compartment(id=f"{sid}:{category}", station_id=sid, category=category,
+                               source="simulated", fill=None, quality="missing"))
+        db.flush()
+    compartment = db.get(Compartment, f"{sid}:{body.category}")
+    device = db.get(Device, did)
+    if (not compartment or compartment.source != "simulated" or not device
+            or device.station_id != sid or device.role != "fill_monitor"
+            or station is not None and station.name != "Filming demo (synthetic)"):
+        raise HTTPException(409, "Reserved demo identity conflicts with existing configuration")
+    ingest(db, f"waste/v1/stations/{sid}/{did}/fill", {
+        "schema_version": 1, "message_id": str(body.message_id), "station_id": sid, "device_id": did,
+        "measured_at": now().isoformat(), "category": body.category, "fill_percentage": body.fill,
+        "source": "simulated", "quality": "valid",
+    })
+    return station_data(db, db.get(Station, sid))
+
+
 @app.post("/api/stations/{station_id}/collections", status_code=201)
 def collect(station_id: str, body: CollectionInput, db: DBSession = DB):
     require_station(db, station_id)
@@ -272,3 +413,11 @@ def collections(station_id: str | None = None, db: DBSession = DB):
     if station_id:
         query = query.where(Collection.station_id == station_id)
     return [serialize(x) for x in db.scalars(query.order_by(Collection.created_at.desc()).limit(100))]
+
+
+@app.post("/api/routes/plan")
+def collection_route(body: RoutePlanInput, db: DBSession = DB):
+    try:
+        return plan_collection(db, body)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None

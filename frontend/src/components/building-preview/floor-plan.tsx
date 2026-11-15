@@ -1,16 +1,17 @@
 import { binAttentionKind, matchesAttention } from "@/lib/bin-attention";
 import type { AttentionFilter } from "@/lib/bin-attention";
 import { useId } from "react";
+import type { ReactNode } from "react";
 import {
-  elevator,
+  buildingFeatures,
   entrance,
   floorRooms,
   footprint,
-  stairs,
   atrium,
 } from "./layout";
 import type { Building, Floor } from "./layout";
 import type { Station } from "@/api";
+import { BinPreview } from "./bin-preview";
 export function FloorPlan({
   building,
   floor,
@@ -19,6 +20,9 @@ export function FloorPlan({
   selectedId,
   onSelect,
   attention = "all",
+  overlay,
+  binPreview,
+  binAccent,
 }: {
   building: Building;
   floor: Floor;
@@ -27,7 +31,13 @@ export function FloorPlan({
   selectedId?: string;
   onSelect: (bin: Station, anchor?: Element) => void;
   attention?: AttentionFilter;
+  overlay?: ReactNode;
+  binPreview?: (bin: Station) => ReactNode;
+  binAccent?: (
+    bin: Station,
+  ) => { color: string; foreground: string } | undefined;
 }) {
+  const { elevator, stairs } = buildingFeatures(building.id);
   const gridId = `plan-grid-${useId().replaceAll(":", "")}`;
   return (
     <svg
@@ -77,6 +87,17 @@ export function FloorPlan({
           </text>
         </g>
       ))}
+      {building.id !== "tower" &&
+        [42, 58].flatMap((x) =>
+          [35, 65].map((y) => (
+            <path
+              key={`${x}-${y}`}
+              d={`M${x} ${y - 2}v4`}
+              stroke="var(--background)"
+              strokeWidth="1"
+            />
+          )),
+        )}
       <text x="50" y="46" textAnchor="middle" className="plan-small-label">
         {building.id === "mall" ? "ATRIUM" : "CORRIDOR"}
       </text>
@@ -126,7 +147,7 @@ export function FloorPlan({
         {[0, 1, 2, 3, 4].map((i) => (
           <path
             key={i}
-            d={`M46 ${20 + i * 2}h8`}
+            d={`M46 ${stairs.y + 2 + (i * (stairs.depth - 4)) / 4}h8`}
             stroke="var(--muted-foreground)"
             strokeWidth=".4"
           />
@@ -158,80 +179,99 @@ export function FloorPlan({
           </text>
         </g>
       )}
+      {overlay}
       {stations
         .filter((bin) => bin.floor_id === floor.id)
-        .map((bin) => (
-          <g
-            key={bin.id}
-            role="button"
-            tabIndex={0}
-            aria-label={`Select ${bin.name} on ${floor.name}`}
-            aria-pressed={selectedId === bin.id}
-            className="plan-bin"
-            data-dimmed={!matchesAttention(bin, attention)}
-            data-attention={binAttentionKind(bin)}
-            data-bin-id={bin.id}
-            onClick={(event) => onSelect(bin, event.currentTarget)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                onSelect(bin, event.currentTarget);
-              }
-            }}
-          >
-            <rect
-              x={bin.x - 7}
-              y={bin.y - 7}
-              width="14"
-              height="14"
-              fill="transparent"
-            />
-            <title>
-              {bin.name} · {bin.id.toUpperCase()}
-            </title>
-            {binAttentionKind(bin) !== "none" && (
-              <circle
-                className="plan-bin-status"
-                cx={bin.x + 4.5}
-                cy={bin.y - 4.5}
-                r="1.4"
-              />
-            )}
-            <rect
-              x={bin.x - 5}
-              y={bin.y - 4}
-              width="10"
-              height="8"
-              rx="2"
-              className="plan-bin-body"
-              fill={selectedId === bin.id ? "var(--primary)" : "var(--card)"}
-              stroke="var(--primary)"
-              strokeWidth={selectedId === bin.id ? ".8" : ".45"}
-            />
-            <path
-              d={`M${bin.x - 2} ${bin.y - 2}h4`}
-              stroke={
-                selectedId === bin.id
-                  ? "var(--primary-foreground)"
-                  : "var(--primary)"
-              }
-              strokeWidth=".7"
-            />
-            <text
-              x={bin.x}
-              y={bin.y + 1.5}
-              textAnchor="middle"
-              className="plan-bin-label"
-              fill={
-                selectedId === bin.id
-                  ? "var(--primary-foreground)"
-                  : "var(--primary)"
-              }
+        .map((bin) => {
+          const accent = binAccent?.(bin);
+          const marker = (
+            <g
+              key={bin.id}
+              role="button"
+              tabIndex={0}
+              aria-label={`Select ${bin.name} on ${floor.name}`}
+              aria-pressed={selectedId === bin.id}
+              className="plan-bin"
+              data-dimmed={!matchesAttention(bin, attention)}
+              data-attention={binAttentionKind(bin)}
+              data-bin-id={bin.id}
+              onClick={(event) => onSelect(bin, event.currentTarget)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.currentTarget.dispatchEvent(
+                    new MouseEvent("click", { bubbles: true }),
+                  );
+                }
+              }}
             >
-              {bin.id.toUpperCase()}
-            </text>
-          </g>
-        ))}
+              <rect
+                x={bin.x - 7}
+                y={bin.y - 7}
+                width="14"
+                height="14"
+                fill="transparent"
+              />
+              {!binPreview && <title>{bin.name} · {bin.id.toUpperCase()}</title>}
+              {binAttentionKind(bin) !== "none" && (
+                <circle
+                  className="plan-bin-status"
+                  cx={bin.x + 4.5}
+                  cy={bin.y - 4.5}
+                  r="1.4"
+                />
+              )}
+              <rect
+                x={bin.x - 5}
+                y={bin.y - 4}
+                width="10"
+                height="8"
+                rx="2"
+                className="plan-bin-body"
+                fill={
+                  selectedId === bin.id
+                    ? accent?.color || "var(--primary)"
+                    : "var(--card)"
+                }
+                stroke={accent?.color || "var(--primary)"}
+                strokeWidth={selectedId === bin.id ? ".8" : ".45"}
+              />
+              <path
+                d={`M${bin.x - 2} ${bin.y - 2}h4`}
+                stroke={
+                  selectedId === bin.id
+                    ? accent?.foreground || "var(--primary-foreground)"
+                    : accent?.color || "var(--primary)"
+                }
+                strokeWidth=".7"
+              />
+              <text
+                x={bin.x}
+                y={bin.y + 1.5}
+                textAnchor="middle"
+                className="plan-bin-label"
+                fill={
+                  selectedId === bin.id
+                    ? accent?.foreground || "var(--primary-foreground)"
+                    : accent?.color || "var(--primary)"
+                }
+              >
+                {bin.id.toUpperCase()}
+              </text>
+            </g>
+          );
+          return binPreview ? (
+            <BinPreview
+              key={bin.id}
+              content={binPreview(bin)}
+              label={`Fill levels ${bin.id.toUpperCase()}`}
+            >
+              {marker}
+            </BinPreview>
+          ) : (
+            marker
+          );
+        })}
     </svg>
   );
 }

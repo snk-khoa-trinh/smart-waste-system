@@ -35,3 +35,59 @@ curl -F station_id=s11 -F device_id=s11-cam \
 ```
 
 Collection recording preserves fullness. Metrics intentionally include last known ≥80% readings even when stale; consult stale flags before acting. No sensor reading is inferred from a collection.
+
+## Filming records
+
+`POST /filming/events` accepts JSON `request_id` (UUID), `station_id`, camera/sorter
+`device_id`, and `category` (recyclable/non_recyclable/e_waste). It creates an
+operator-selected event without an image, inference request or motor action.
+Provider is `filming`, model `operator-selected`, confidence is null and simulated
+is true. Same-ID/same-input retries are idempotent; changed inputs return409.
+The filming helper reports a separate `/outcomes` completion with simulated=true
+only after USB sequence acknowledgement. This is a staged command demonstration,
+not a model prediction or independent proof of a physical drop. Like the existing
+API, this route is unauthenticated and intended for local deployment only.
+
+- `POST /filming/events/{event_id}/image`: multipart JPEG + `arrival_id` UUID;
+  attaches a separately staged still only to an existing provider=filming event.
+  Normal JPEG limits apply. Same image/arrival is idempotent; replacement returns409.
+- `GET /filming/events/{event_id}/capture`: event association, arrival UUID,
+  SHA-256, save timestamp and image URL. The timestamp is backend save time,
+  not the time of the earlier motor take.
+- `GET /filming/events/{event_id}/image`: JPEG download/view, no inference.
+- `POST /filming/fill`: JSON message_id UUID, category and fill0..100. Creates a
+  reserved `filming-demo` bin on campus floor-1 if absent; writes only synthetic
+  telemetry through the normal ingestion validation/deduplication path. Extra
+  station/device/source fields are rejected. Existing physical bins are untouched.
+
+Migration0002 adds capture metadata; JPEGs persist separately in the
+`filming-images` volume. Upload/download routes are local unauthenticated demo
+utilities, not a public image host. Images can contain private surroundings:
+keep the local deployment private and do not commit generated images/manifests.
+
+## Cleaner route plan
+
+`POST /routes/plan` is read-only JSON planning. Body:
+
+```json
+{"building_id":"tower","source":"demo","threshold":80,"travel_mode":"elevator","start_node_id":null}
+```
+
+`building_id` is campus/mall/tower; source live(default)/demo; threshold1–100
+(default80); travel_mode elevator(default)/stairs; optional start_node_id must be
+an entrance/lift/stair node in that building. The default start is the main
+entrance on the lowest floor. All tours return to start. Invalid/unseeded or
+unsupported inputs return422; no provider/MQTT call or database write occurs.
+
+Response includes building/floors, graph nodes/edges/start_options, bin positions
+and eligible values, ordered grouped `stops`, `excluded` with reasons, expanded
+`legs` and `baseline_legs`, `baseline_order`, source, generated_at, layout_version,
+algorithm, optimal_for_modeled_graph, estimated=true, assumptions and summary.
+Summary contains stops/total_bins, walking_meters, travel_seconds, service_seconds,
+total_seconds, baseline_travel_seconds, baseline_walking_meters,
+saved_travel_seconds and saved_percent. The baseline visits identical selected
+stops in floor/bin-ID order. `optimal_for_modeled_graph` is true only when the
+bounded exact solver is used (at most12 stops); larger tours are heuristics.
+Live excludes synthetic/stale/invalid/missing/future readings and readings already
+covered by collection records. Demo is a request-only synthetic scenario, not a
+telemetry seed. Details and cost units: [routing guide](collection-routing.md).

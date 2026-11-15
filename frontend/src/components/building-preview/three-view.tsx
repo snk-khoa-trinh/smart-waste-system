@@ -14,11 +14,10 @@ import { Vector3 } from "three";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
 import {
-  elevator,
+  buildingFeatures,
   entrance,
   floorRooms,
   footprint,
-  stairs,
   rectCenter,
   toWorld,
   atrium,
@@ -242,6 +241,7 @@ function BuildingModel({
   setHover: (id: string | null) => void;
   palette: Palette;
 }) {
+  const { elevator, stairs } = buildingFeatures(building.id);
   const shown = focusedFloorId
     ? floors.filter((floor) => floor.id === focusedFloorId)
     : floors;
@@ -304,12 +304,12 @@ function BuildingModel({
             ))}
             <Block
               position={[liftX, y + 1.05, liftZ]}
-              size={[2.1, 1.8, 2.1]}
+              size={[elevator.width * 0.2, 1.8, elevator.depth * 0.2]}
               color={palette.glass}
               edge={palette.edge}
             />
             <Block
-              position={[liftX, y + 1.05, liftZ + 1.06]}
+              position={[liftX, y + 1.05, liftZ + elevator.depth * 0.1 + 0.01]}
               size={[0.035, 1.5, 0.02]}
               color={palette.edge}
             />
@@ -320,9 +320,15 @@ function BuildingModel({
                 position={[
                   stairX,
                   y + 0.2 + step * 0.12,
-                  stairZ - 0.9 + step * 0.36,
+                  stairZ -
+                    stairs.depth * 0.1 +
+                    ((step + 0.5) * stairs.depth * 0.2) / 6,
                 ]}
-                size={[1.9, 0.12 + step * 0.24, 0.36]}
+                size={[
+                  stairs.width * 0.16,
+                  0.12 + step * 0.24,
+                  (stairs.depth * 0.2) / 6,
+                ]}
                 color={palette.wall}
               />
             ))}
@@ -387,7 +393,12 @@ type ModelLabel = {
   kind: "bin" | "floor" | "feature" | "room";
   bin?: Station;
 };
-function modelLabels(props: PreviewProps, exploded: boolean): ModelLabel[] {
+function modelLabels(
+  props: PreviewProps,
+  exploded: boolean,
+  hovered: string | null,
+): ModelLabel[] {
+  const { elevator } = buildingFeatures(props.building.id);
   const shown = props.focusedFloorId
     ? props.floors.filter((floor) => floor.id === props.focusedFloorId)
     : props.floors;
@@ -402,13 +413,14 @@ function modelLabels(props: PreviewProps, exploded: boolean): ModelLabel[] {
         text: floor.name,
         kind: "floor",
       },
-      {
+    ];
+    if (shown.length <= 4)
+      labels.push({
         id: `lift-${floor.id}`,
         position: [liftX, y + 2.35, liftZ],
         text: "Elevator",
         kind: "feature",
-      },
-    ];
+      });
     if (level === 0) {
       const [x, z] = toWorld(entrance.x, entrance.y);
       labels.push({
@@ -431,6 +443,8 @@ function modelLabels(props: PreviewProps, exploded: boolean): ModelLabel[] {
     for (const bin of props.stations.filter(
       (bin) => bin.floor_id === floor.id,
     )) {
+      if (shown.length > 4 && bin.id !== props.selectedId && bin.id !== hovered)
+        continue;
       const [x, z] = toWorld(bin.x, bin.y);
       labels.push({
         id: `bin-${bin.id}`,
@@ -500,7 +514,12 @@ const SceneControls = forwardRef<ThreeViewHandle, { height: number }>(
         if (!controls.current) return;
         const target = controls.current.target;
         const offset = camera.position.clone().sub(target);
-        offset.setLength(Math.min(95, Math.max(12, offset.length() * factor)));
+        offset.setLength(
+          Math.min(
+            Math.max(95, height * 5),
+            Math.max(12, offset.length() * factor),
+          ),
+        );
         camera.position.copy(target).add(offset);
         controls.current.update();
         invalidate();
@@ -511,7 +530,7 @@ const SceneControls = forwardRef<ThreeViewHandle, { height: number }>(
         ref={controls}
         makeDefault
         minDistance={12}
-        maxDistance={95}
+        maxDistance={Math.max(95, height * 5)}
         minPolarAngle={0.15}
         maxPolarAngle={Math.PI / 2 - 0.05}
         enablePan
@@ -550,7 +569,7 @@ const Building3D = forwardRef<
       ? darkPalette
       : lightPalette;
   const shownCount = props.focusedFloorId ? 1 : props.floors.length;
-  const labels = modelLabels(props, exploded);
+  const labels = modelLabels(props, exploded, hovered);
   const height = (shownCount - 1) * (exploded ? 5.2 : 3) + 1.7;
   const fallback = (
     <div className="empty">
@@ -573,7 +592,7 @@ const Building3D = forwardRef<
           <Canvas
             frameloop="demand"
             dpr={[1, 1.5]}
-            camera={{ fov: 42, near: 0.1, far: 200 }}
+            camera={{ fov: 42, near: 0.1, far: Math.max(200, height * 10) }}
             gl={{ antialias: true, powerPreference: "low-power" }}
             fallback={fallback}
             onCreated={({ gl }) => {
@@ -640,7 +659,7 @@ const Building3D = forwardRef<
                       hovered === label.bin.id ||
                       props.selectedId === label.bin.id
                     }
-                    aria-label={`Select 3D bin ${label.bin.name}`}
+                    aria-label={`Select 3D bin ${label.bin.name} (${label.bin.id.toUpperCase()})`}
                     aria-pressed={props.selectedId === label.bin.id}
                     onPointerEnter={() => setHovered(label.bin!.id)}
                     onPointerLeave={() => setHovered(null)}

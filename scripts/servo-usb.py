@@ -29,7 +29,7 @@ def main():
         action="store_true",
         help="Observe one autonomous item after auto-once",
     )
-    parser.add_argument("--route", choices=["home", "side"])
+    parser.add_argument("--route", choices=["home", "side", "reverse"])
     parser.add_argument("--servo", choices=["classifier", "opener"])
     parser.add_argument(
         "--pulse-us",
@@ -144,6 +144,8 @@ def main():
             raise SystemExit(
                 "Disable auto mode and wait for current outcome before manual motion"
             )
+        if args.command == "cycle" and args.route == "reverse" and not latest.get("filming_reverse_supported"):
+            raise SystemExit("Updated station firmware required for filming reversal; no motion sent.")
         if args.command == "cycle" and not latest.get("sorting_cycle_supported"):
             raise SystemExit(
                 "Installed firmware does not support sorting cycles; no motion sent."
@@ -277,14 +279,16 @@ def main():
             ):
                 print(json.dumps(body, indent=2), flush=True)
                 if args.command == "cycle" and not (
-                    body.get("servo_holding_home")
-                    and body.get("classifier_command_us")
-                    == body.get("classifier_home_us")
+                    body.get("classifier_command_us")
+                    == body.get("classifier_side_us" if args.route == "reverse" else "classifier_home_us")
                     and body.get("opener_command_us") == body.get("opener_closed_us")
                 ):
                     raise SystemExit(
-                        "Cycle finished without verified home holding commands"
+                        "Cycle finished without verified return/closed commands"
                     )
+                if args.command == "cycle" and args.route == "reverse":
+                    print("PASS: filming reverse complete; holding classifier 2000 us and opener closed.")
+                    return
                 print(
                     "PASS: sequence complete; holding classifier home and opener closed."
                     if body.get("servo_holding_home")

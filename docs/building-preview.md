@@ -1,6 +1,6 @@
 # Building previews
 
-The overview offers a 2D floor plan and a 3D cutaway for each configured building. The campus seed has two floors and four bins; the mall has three floors and eight bins. Existing campus and hardware IDs remain unchanged, and new mall placeholders do not invent sensor measurements.
+The overview offers a 2D floor plan and a 3D cutaway for each configured building. The campus seed has two floors and four bins; the mall has three floors and eight bins. Riverside Complex adds eight floors and96 bins with corridor-side positions and four wings per floor. Existing campus and hardware IDs remain unchanged; new placeholders do not invent sensor measurements.
 
 The building preview is the overview's main workspace. Its two toolbar rows combine the building selector and 2D/3D tabs, then floor selection and camera controls. There is no separate overview bin-card list or repeated location filter. In 2D, the floor selector shows one floor at a time. In 3D it can show every level or isolate a floor.
 
@@ -28,3 +28,23 @@ DASHBOARD_URL=http://127.0.0.1:5174 CHROMIUM_PATH=/usr/local/bin/chromium \
 ```
 
 Apply updated location identities to an existing installation with `sudo ./scripts/seed-locations.sh`. Rebuild the frontend container after installing the 3D dependencies. No backend restart or firmware change is required for viewing these layouts.
+
+## Large-building routing
+
+Riverside uses a different four-wing schematic, matching the route planner's
+corridor grid and core locations. Elevator/stair geometry comes from
+`buildingFeatures` for both SVG and 3D; camera distance bounds scale to show all
+eight floors. `/routes` adds numbered itineraries and actual walk-graph segments
+to the same floor plan. See [routing guide](collection-routing.md). The third
+building is a designed demonstration, not a surveyed or instrumented site.
+
+When more than four floors are shown in3D, bin labels appear only for the
+selected/hovered bin to avoid covering the model with96 overlapping labels.
+Floor labels remain visible; isolating a floor restores all its bin labels.
+The individual3D bin meshes remain selectable in either mode.
+
+The collection-route map additionally uses theme-aware blue/teal/amber route
+roles and direction chevrons. Its default isolates the selected approach with
+other paths faded; All legs shows the circuit. SVG markers compose the shared
+shadcn Tooltip/Popover primitives for hover/focus and pinned click/tap fill
+summaries. Overview markers retain their existing bin-detail behavior.

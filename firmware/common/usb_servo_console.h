@@ -21,8 +21,8 @@ void usbServoConsoleLoop() {
       else if (stationCommand(line)) {}
       else if (stationMotionBlocked()) Serial.println("ERROR disable auto mode and wait for current cycle before manual motion");
 #endif
-      else if (!strcmp(line, "cycle home") || !strcmp(line, "cycle side")) {
-        int route = !strcmp(line, "cycle home") ? 0 : 1;
+      else if (!strcmp(line, "cycle home") || !strcmp(line, "cycle side") || !strcmp(line, "cycle reverse")) {
+        int route = !strcmp(line, "cycle home") ? 0 : !strcmp(line, "cycle side") ? 1 : 2;
         if (!ServoBench::start(0, 0, 0, false, route)) Serial.println("ERROR cycle unavailable or busy");
         else Serial.println("CYCLE START: close, home, position, open, close, return home, KEEP HOME PWM");
         status();

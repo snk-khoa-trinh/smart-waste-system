@@ -13,3 +13,9 @@ Read the [root baseline](../AGENTS.md) and [frontend workflow](README.md) as wel
 The navigation/building-preview browser specs use fixtures; the dashboard
 integration spec requires an isolated mock backend. Keep tests versioned and
 exclude test artifacts from shipped images instead of hiding regressions in Git.
+
+Collection route (`/routes`) displays backend graph paths, source and model
+assumptions. Preserve floor-transition breaks and same-stop baseline comparisons.
+Keep Riverside's wing/core geometry aligned with `backend/app/routing.py` and
+the seed; do not interpolate straight paths through obstacles or imply a
+heuristic plan is a proven global optimum.
