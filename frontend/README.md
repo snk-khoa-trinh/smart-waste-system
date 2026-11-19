@@ -55,7 +55,7 @@ paths rather than straight lines between bins. See [collection routing](../docs/
 for eligibility, modeled cost assumptions, source labels and filming steps.
 
 Route visibility uses a selected blue approach with direction chevrons, plus an
-optional teal/amber full circuit. Bin hover/focus shows fill levels; click/tap pins
-them. The live preview reads the station API with quality/freshness labels rather
+optional teal/amber full circuit. Click/tap a bin, or focus it and press Enter,
+to open its fill levels; Escape dismisses the popup. The live preview reads the station API with quality/freshness labels rather
 than treating the route snapshot as current sensor data. Dedicated UI regressions
 are in `e2e/collection-route.spec.ts`; all API responses there are isolated fixtures.

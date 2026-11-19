@@ -156,4 +156,4 @@ These labels map 1000–2000 microseconds to nominal 0–180 degrees; actual ang
 
 ### Prototype acceptance after sweep
 
-The user observed that nominal 180 appeared similar to about 120 degrees of actual travel and accepted approximately 120 degrees total for a two-position prototype. Actual travel is not measured. Step 8 bench identification is accepted with this limitation; three-compartment routing and mounted alignment remain unverified. See [prototype sorting cycle](prototype-sort-cycle.md) for the prepared step 9 integration and its prerequisites.
+The user observed that nominal 180 appeared similar to about 120 degrees of actual travel and accepted the observed travel for the selected prototype configuration. Actual travel is not measured. Step 8 bench identification was accepted; mounted alignment still required verification at this stage. See [prototype sorting cycle](prototype-sort-cycle.md) for the prepared step 9 integration and its prerequisites.

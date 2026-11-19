@@ -1,0 +1,2 @@
+# Kdenlive embeds title text; preserve its authored whitespace.
+*.kdenlive -whitespace

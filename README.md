@@ -1,125 +1,125 @@
-# Smart Waste System (SWS)
+# Smart Waste System
 
-SWS is a local prototype for automatic waste sorting and bin monitoring. An
-ESP32-CAM detects an inlet arrival and retains a JPEG. A separate ESP32 DevKit
-asks the FastAPI backend to classify that image through Roboflow, then controls
-the chute and flap for accepted categories. The backend records classification
-and physical outcomes separately. MQTT carries board heartbeats and fill readings;
-the React dashboard shows bins, collection tasks, cleaner routes and records.
-Fresh fill readings identify collection stops; a schematic walking graph helps
-order those stops with less backtracking.
+**An IoT prototype connecting waste sorting, bin monitoring, and collection planning.**
 
-![SWS architecture: inlet and camera, station controller, inference API, servos, MQTT, database and dashboard.](docs/assets/system-architecture.svg)
+Smart Waste System (SWS) explores a practical question: can sorting waste at the
+point of disposal, together with better information about bin usage, make waste
+collection easier to manage?
 
-[Editable diagram source](docs/assets/system-architecture.mmd)
+Built by Kelvin, the project combines an ESP32-based physical prototype with an
+image-classification service and a web dashboard. It brings together electronics,
+embedded programming, mechanical control, backend development, and interface
+design in one system intended for caretakers and collection staff.
 
-## Start with the relevant folder
+**[Watch the demo](video/video.mp4)** · **[Video and editing files](video/)** ·
+**[Technical documentation](docs/README.md)** ·
+**[System architecture](docs/architecture.md)**
 
-| Folder | Guide | Agent instructions |
+The demo runs approximately 3 minutes 15 seconds, in 1080p at 30 fps. The
+[video folder](video/) includes the editable Kdenlive project and narration script.
+Bulky source recordings, audio takes, and recovery history are kept locally and
+excluded from Git; reopening the edit requires that source-media archive.
+
+## What the system does
+
+- **Sorting:** detects an item at the inlet, captures an image, requests a waste
+  category prediction, and coordinates a sorting chute and release flap for
+  supported categories.
+- **Monitoring:** displays bin locations in 2D and 3D, compartment fill readings,
+  device connectivity, sorting activity, and collection records.
+- **Collection planning:** identifies bins needing collection and calculates a
+  walking circuit through modeled corridors and floor connections.
+
+The design considers recyclable, non-recyclable, and electronic waste.
+The [station guide](docs/autonomous-station.md) documents the current category
+routing and calibrated operating settings.
+
+## How it works
+
+![System architecture showing the camera, station controller, classification service, telemetry, database, and dashboard.](docs/assets/system-architecture.svg)
+
+1. An ultrasonic inlet sensor detects an arrival. The **ESP32-CAM** retains an
+   image associated with that arrival.
+2. A separate **ESP32 DevKit** sends the image to the **FastAPI backend**, which
+   requests a prediction from a **Roboflow workflow**.
+3. For an accepted category, the DevKit positions the chute and opens the flap.
+   The prediction and the subsequent motion outcome are recorded separately.
+4. Device heartbeats and fill readings travel through **MQTT** to a dedicated
+   ingestion worker and **PostgreSQL** database.
+5. The **React dashboard** presents this information and provides collection
+   planning tools. It does not need to remain open for the controller to operate.
+
+The API and inference service currently run on a local computer. The physical
+station depends on network access to those services.
+
+## Engineering decisions
+
+**Separate recognition from execution.** A predicted category is not proof that
+an item reached its destination. Classification and controller-reported outcomes
+have separate records and timestamps.
+
+**Prevent duplicate motion.** Arrival locks, fresh-image checks, and restart
+journals reduce the risk of reusing a capture or replaying a motor sequence.
+
+**Preserve the meaning of data.** The dashboard distinguishes sensor readings,
+synthetic examples, stale measurements, and unavailable values. Missing readings
+are not displayed as empty bins.
+
+**Connect monitoring to an operator task.** Collection planning uses eligible fill
+readings and a walking graph. Small tours are solved exactly within that model;
+larger tours use heuristics. Travel costs are schematic estimates, not measured
+walking times.
+
+## Demonstration and evaluation
+
+The demonstration shows the mechanism, dashboard, and monitoring workflow.
+Operator-selected mechanism tests and sample dashboard records are labeled as
+demonstrations; they are not measurements of autonomous recognition accuracy.
+One compartment has a physical fill sensor; other compartment
+readings and the illustrative fill animation are synthetic.
+
+The software includes backend tests, frontend unit and browser tests, and native
+firmware logic tests. These checks support development, but do not establish
+physical sorting accuracy or long-term reliability. The
+[validation guide](docs/ci.md) describes automated checks, and the
+[station development record](docs/autonomous-station.md) documents hardware
+experiments and unresolved findings.
+
+## Limitations and next steps
+
+| Area | Current limitation | Next step |
 | --- | --- | --- |
-| [backend](backend/) | [API, worker, database and tests](backend/README.md) | [AGENTS](backend/AGENTS.md) |
-| [frontend](frontend/) | [Dashboard and UI development](frontend/README.md) | [AGENTS](frontend/AGENTS.md) |
-| [firmware](firmware/) | [Active board sources, builds and wiring](firmware/README.md) | [AGENTS](firmware/AGENTS.md) |
-| [scripts](scripts/) | [Setup, automatic operation and diagnostics](scripts/README.md) | [AGENTS](scripts/AGENTS.md) |
-| [infra](infra/) | [Broker accounts and topic permissions](infra/README.md) | [AGENTS](infra/AGENTS.md) |
-| [simulator](simulator/) | [Explicit synthetic demo data](simulator/README.md) | [AGENTS](simulator/AGENTS.md) |
-| [docs](docs/) | [Architecture, contracts and hardware history](docs/README.md) | [AGENTS](docs/AGENTS.md) |
-| [.github](.github/) | [CI checks](docs/ci.md) | [AGENTS](.github/AGENTS.md) |
+| Image capture | Image quality and capture timing need validation on the assembled inlet. | Improve lighting and tune detection and exposure timing. |
+| Recognition | Accuracy across varied waste and conditions has not been established. | Evaluate a broader labeled dataset and report category-level results. |
+| Disposal behavior | Mixed waste and multiple-item drops are not validated use cases. | Test realistic disposal patterns and define handling for ambiguous inputs. |
+| Operational data | Fill forecasting is not implemented; route planning uses current readings and a schematic map. | Collect fill history, evaluate forecasting, and refine routes with surveyed distances and operating constraints. |
 
-Agents should read [root instructions](AGENTS.md) before the instructions for
-folders they change. Commands below run from the repository root.
+The current system is a local research and engineering prototype. Public
+deployment would also require security, reliability, and operational work
+described in the [architecture guide](docs/architecture.md).
 
-## Run the software demo
+## Explore or run the project
 
-Install Docker with Compose, uv, and Nub 0.9.0. On a fresh checkout, copy
-[.env.example](.env.example) to `.env`; preserve an existing configured `.env`.
+| Resource | Contents |
+| --- | --- |
+| [Documentation](docs/README.md) | Suggested reading order, design details, and development evidence |
+| [Software demo](simulator/README.md) | Run the dashboard with explicitly synthetic data and mock inference |
+| [Backend](backend/README.md) | API, persistence, inference integration, and tests |
+| [Frontend](frontend/README.md) | Dashboard development and browser validation |
+| [Firmware](firmware/README.md) | Camera and station code, wiring, and builds |
+| [Operation tools](scripts/README.md) | Setup, calibration, diagnostics, and station operation |
+| [Messaging infrastructure](infra/README.md) | MQTT configuration and device permissions |
 
-```sh
-docker compose --profile demo up --build -d --wait
-```
+The software uses Python with uv, React/TypeScript with Nub 0.9.0, Docker Compose,
+and PlatformIO for the ESP32 firmware. Start with the software demo guide for an
+isolated environment; it does not require connected hardware or paid inference.
+Hardware setup and operating commands are documented in the firmware and scripts
+guides. Local credentials and device configuration are excluded from version control.
 
-Open <http://localhost:5173>; API documentation is at
-<http://localhost:8000/docs>. The default provider is mock and the simulator
-labels measurements as synthetic. The demo does not drive physical boards.
-Use an isolated environment for the demo; do not start its simulator against an
-existing hardware deployment. Docker may require `sudo` on your machine. See [simulator setup](simulator/README.md).
+## Demo video music credits
 
-## Develop the dashboard against the hardware backend
+Music I Use: https://www.bensound.com/free-music-for-videos
 
-For the existing private hardware configuration:
+License code: I6P9U3P3JIWKAWYA
 
-```sh
-sudo docker compose start db broker api worker
-sudo docker compose \
-  --env-file .env --env-file .env.hardware --env-file .env.roboflow \
-  -f compose.yaml -f compose.hardware.yaml -f compose.roboflow.yaml \
-  -f compose.frontend-dev.yaml up -d --build --no-deps --wait frontend
-```
-
-Frontend source reloads automatically. Rebuild after dependency changes.
-The frontend uses Vite, React, TypeScript, TanStack Router/Query, shadcn/ui and
-Tailwind. [Frontend guide](frontend/README.md) covers local development and checks.
-
-## Plan cleaner collection routes
-
-Open **Collection route** (`/routes`). Select **Riverside Complex** for the new
-8-floor,96-bin example, then choose **Demo fill scenario** to explore routing
-without changing hardware readings. Live mode uses fresh sensor readings at the
-collection threshold. Plans follow modeled corridors and floor connections,
-return to the start, and compare travel against the same stops in bin-ID order.
-Small plans are exact for the model; large plans use labelled heuristics.
-[Routing guide](docs/collection-routing.md) covers setup, algorithms, assumptions,
-validation and the additional demo-video scene.
-
-## Configure and operate physical boards
-
-The committed environment templates are:
-
-- [.env.example](.env.example): API/database/provider and worker settings.
-- [.env.hardware.example](.env.hardware.example): LAN binding and device MQTT accounts.
-- [.env.roboflow.example](.env.roboflow.example): live workflow overrides; the API key stays in `.env`.
-
-Generate matching Wi-Fi/MQTT board headers with `scripts/configure-hardware.py`,
-create the private camera OTA credential with `scripts/camera-control.py configure`,
-and generate the DevKit control header with `scripts/configure-station.py`.
-Follow [firmware setup](firmware/README.md) before uploading. Private `.env*` and
-`*.local.h` files are ignored; examples and lockfiles are committed.
-
-After firmware and services are configured:
-
-```sh
-./scripts/test-full-sequence.sh       # One autonomous item; same as station-auto once
-./scripts/station-auto.sh on          # Continuous mode, saved on the DevKit
-./scripts/station-auto.sh off         # Disable new arrivals
-./scripts/station-auto.sh stop        # Disable auto and release servo PWM
-./scripts/station-auto.sh status
-```
-
-Arming commands check MQTT accounts and repair them if needed before proceeding;
-sudo may prompt for Docker access. The full-sequence script uses the firmware
-controller, not a separate per-item laptop bridge. Details are in
-[scripts](scripts/README.md) and [station operation](docs/autonomous-station.md).
-
-The current mechanism has two positions: recyclable at home, e-waste at the side.
-Unknown/non-recyclable decisions do not actuate. One compartment has a physical
-fill sensor; two remain explicitly simulated. Fill calibration is provisional.
-Fast drop detection, exposure timing and recognition accuracy need acceptance
-checks on the assembled mount; successful upload/compilation alone does not prove
-an item was imaged correctly or sorted. Historical validation notes are indexed
-in [docs](docs/README.md).
-
-## Verify changes
-
-```sh
-uv run --directory backend ruff check app tests migrations ../scripts ../simulator
-uv run --directory backend pytest -q
-nub --cwd frontend run lint
-nub --cwd frontend run test
-nub --cwd frontend run build
-./scripts/check-firmware.sh
-```
-
-Firmware checks compile the two active images and native logic tests without
-uploading. Frontend browser checks and isolated mock integration checks are
-explained in their folder guides. Tests remain versioned for reproducibility;
-production Docker build contexts exclude test folders and local scratch tools.
+Artist: Benjamin Tissot

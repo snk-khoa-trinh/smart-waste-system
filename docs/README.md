@@ -1,40 +1,84 @@
-# Documentation index
+# Smart Waste System: technical documentation
 
-[Repository guide](../README.md) · [Documentation agent rules](AGENTS.md)
+Smart Waste System combines a physical sorting prototype with software for bin
+monitoring and collection planning. These documents explain the engineering
+behind the project, the evidence gathered during development, and the questions
+that remain open.
 
-## Current entrypoints
+[Project overview](../README.md) · [Demo video](../video/)
 
-| Guide | Read for |
+## Suggested reading order
+
+For a first review, begin with the project overview and demonstration, then read
+these three guides:
+
+1. **[System architecture](architecture.md):** how the camera, controller,
+   classification service, telemetry worker, database, and dashboard interact.
+2. **[Station operation and development evidence](autonomous-station.md):**
+   arrival detection, capture timing, motor sequencing, recovery behavior, and
+   the results of hardware experiments.
+3. **[Collection planning](collection-routing.md):** how fill readings become
+   collection stops, how routes are calculated, and what the model assumes.
+
+The station document is a chronological engineering record. Some early findings
+are superseded by later entries; it should be read alongside the current source
+and component guides rather than treated as a single acceptance report.
+
+## Design and implementation
+
+| Guide | Questions it answers |
 | --- | --- |
-| [Architecture](architecture.md) | Services, device responsibilities and data flow |
-| [Continuous integration](ci.md) | Automated checks and isolated integration workflow |
-| [HTTP API](api.md) | Routes, validation, inference and outcome contracts |
-| [MQTT](mqtt.md) | Topic schemas, source/quality and device permissions |
-| [Station operation and evidence](autonomous-station.md) | Autonomous controller, arrival/frame locking, calibration, broker recovery and chronological hardware findings |
-| [Cleaner collection routes](collection-routing.md) | Live/demo stop selection, walking graph, algorithms, Riverside setup and filming |
-| [Building previews](building-preview.md) | Shared 2D/3D geometry, interactions and validation |
-| [Demo filming handoff](filming-handoff.md) | Shot list, recording actions, full-cycle takes and editing checklist |
-| [Firmware README](../firmware/README.md) | Current camera/station source files and build/upload commands |
-| [Scripts README](../scripts/README.md) | Current setup, operation and diagnostic commands |
+| [Architecture](architecture.md) | What runs on each device and service? How does information flow through the system? |
+| [HTTP API](api.md) | How are predictions, outcomes, readings, and records represented and validated? |
+| [MQTT messaging](mqtt.md) | How do devices report connectivity and fill measurements? How are duplicate and stale messages handled? |
+| [2D and 3D building views](building-preview.md) | How are bin locations and building geometry presented consistently? |
+| [Collection planning](collection-routing.md) | How are collection stops selected and walking circuits planned? |
+| [Automated validation](ci.md) | Which software checks run, and how are external services isolated during testing? |
 
-The station guide includes experiments that later notes supersede. The current
-source/configuration and folder READMEs determine supported commands. In particular,
-only PlatformIO environments `camera` and `station` remain. Fast arrival transport
-has been exercised, but capture timing on the assembled mount must be accepted by
-checking that the saved image contains the intended item. The last local delay
-was800ms; do not interpret an empty-tray Unknown result as item recognition evidence.
+For development and reproduction, use the component guides:
+[backend](../backend/README.md), [frontend](../frontend/README.md),
+[firmware](../firmware/README.md), [operation tools](../scripts/README.md),
+[MQTT infrastructure](../infra/README.md), and
+[software simulation](../simulator/README.md).
 
-## Historical bring-up notes
+## Understanding the evidence
 
-These retain the development evidence, earlier wiring/profiles and failed checks.
-Their provisional/network/fill/servo environments and some local helper commands
-have been retired. Do not follow them as a fresh-install checklist.
+The project distinguishes several kinds of evidence:
 
-- [Hardware/network](hardware-test.md), [camera](camera-test.md), [inlet](inlet-test.md).
-- [Fill sensor](fill-sensor-test.md), [serial diagnostics](serial-debug.md).
-- [Servo calibration](servo-bench.md), [old laptop sorting cycle](prototype-sort-cycle.md).
-- [Roboflow configuration](roboflow.md), [live workflow experiments](roboflow-live-test.md).
-- [Historical verification matrix](verification.md).
+- **Software checks** exercise API contracts, data processing, interface behavior,
+  and controller logic. A successful build does not establish physical reliability.
+- **Hardware experiments** investigate sensor behavior, image capture, networking,
+  and motion. Capture transport alone does not prove the intended item was visible
+  in the image, and a completed command does not independently confirm its destination.
+- **Staged demonstrations** use operator-selected categories to show mechanical
+  movement. Synthetic records and fill animations illustrate dashboard behavior;
+  they are not live recognition results or measured fill accuracy.
+- **Route examples** demonstrate planning on modeled walking links. Large tours
+  use heuristics, and travel costs have not been established through a surveyed
+  building deployment.
 
-Do not add credentials, private camera images or copied serial logs containing
-secrets. Store local artifacts under ignored `.hardware-backups/` instead.
+The prototype has one physically sensed fill compartment.
+Recognition accuracy, image capture under realistic disposal
+conditions, and handling of mixed or multiple-item drops require further
+validation. Fill forecasting remains future work.
+
+The [filming and demonstration guide](filming-handoff.md) describes how the
+recorded scenes were assembled and identifies their staged and synthetic elements.
+
+## Development archive
+
+These notes preserve the development process, including unsuccessful experiments,
+calibration changes, and earlier designs. Some commands, wiring profiles, and
+helper tools have since been retired. Use current component READMEs for setup.
+
+| Topic | Development notes |
+| --- | --- |
+| Connectivity and device bring-up | [Hardware and network tests](hardware-test.md), [serial diagnostics](serial-debug.md) |
+| Camera and arrival detection | [Camera tests](camera-test.md), [inlet tests](inlet-test.md) |
+| Fill sensing | [Fill sensor tests](fill-sensor-test.md) |
+| Mechanical control | [Servo calibration](servo-bench.md), [earlier laptop-controlled sorting cycle](prototype-sort-cycle.md) |
+| Recognition integration | [Roboflow setup notes](roboflow.md), [live workflow experiments](roboflow-live-test.md) |
+| Earlier validation status | [Historical verification matrix](verification.md) |
+
+Together, these documents provide a record of design choices, observed behavior,
+and remaining work rather than a claim of production readiness.

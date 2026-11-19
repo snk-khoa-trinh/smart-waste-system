@@ -23,3 +23,14 @@ test-results/
 
 # Personal calibration/bring-up helpers; never required by runtime or CI.
 /scripts/local/
+
+# Local video source archive; publish the final demo and latest editing project.
+/video/editing/01-footage/
+/video/editing/02-screen-recordings/
+/video/editing/05-audio/
+/video/editing/06-project/history/
+/video/editing/06-project/*_backup*.kdenlive
+/video/editing/06-project/cachefiles/
+/video/editing/07-exports/
+/video/editing/08-proxies/
+/video/exports/

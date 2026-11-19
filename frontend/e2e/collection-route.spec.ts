@@ -163,16 +163,28 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test("arrows, hover/focus fill details, floor transition and return leg", async ({
+test("arrows, click/keyboard fill details, floor transition and return leg", async ({
   page,
 }) => {
   await page.goto("/routes");
   const marker = page.locator('[data-bin-id="t0102"]');
   await marker.hover();
-  await expect(page.getByRole("tooltip")).toContainText("88%");
-  await expect(page.getByRole("tooltip")).toContainText("stale");
-  await expect(page.getByRole("tooltip")).toContainText("Invalid");
-  await expect(page.getByRole("tooltip")).toContainText("Missing");
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+  const details = page.getByRole("dialog", {
+    name: "Fill levels T0102",
+    exact: true,
+  });
+  await expect(details).not.toBeVisible();
+  await marker.click();
+  await expect(details).toContainText("88%");
+  await expect(details).toContainText("stale");
+  await expect(details).toContainText("Invalid");
+  await expect(details).toContainText("Missing");
+  await marker.hover();
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
+  await expect(page.getByRole("dialog")).toHaveCount(1);
+  await page.keyboard.press("Escape");
+  await expect(details).not.toBeVisible();
   await page.getByRole("combobox", { name: "Readings", exact: true }).click();
   await page
     .getByRole("option", { name: "Demo fill scenario", exact: true })
@@ -184,16 +196,11 @@ test("arrows, hover/focus fill details, floor transition and return leg", async 
     page.locator('[data-active-leg="true"] [data-route-arrow]'),
   ).not.toHaveCount(0);
   await marker.hover();
-  await expect(page.getByRole("tooltip")).toContainText(
-    "Synthetic route scenario",
-  );
+  await expect(page.getByRole("tooltip")).toHaveCount(0);
   await marker.focus();
   await page.keyboard.press("Enter");
-  const details = page.getByRole("dialog", {
-    name: "Fill levels T0102",
-    exact: true,
-  });
   await expect(details).toBeVisible();
+  await expect(details).toContainText("Synthetic route scenario");
   await expect(details).toContainText("72%");
   await page.keyboard.press("Escape");
   await expect(details).not.toBeVisible();

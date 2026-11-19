@@ -1,11 +1,11 @@
-# Two-position sorting prototype
+# Historical sorting integration
 
 > Historical bring-up notes. Some targets and helpers below are retired. For current commands use the [firmware guide](../firmware/README.md) and [scripts guide](../scripts/README.md).
 
 
-Step 8's bench observations were accepted for the prototype: the classifier appeared to span roughly 120 degrees despite nominal commands through 180. This is an observation, not measured calibration. Two positions can be used if the mounted chute reaches the chosen compartments. Three-compartment routing remains unfinished.
+Step 8's bench observations were accepted for the prototype: the classifier appeared to span roughly 120 degrees despite nominal commands through 180. This is an observation, not measured calibration. The mounted chute must reach its configured destinations.
 
-Step 9 now has a computer-mediated, one-shot integration path. The first full recyclable/home cycle passed with user confirmation that the item dropped and the flap closed. The user has now selected recyclable/home and e-waste/side for the two-position prototype; a full e-waste side cycle remains to be verified. Do not force the servo shaft/gears to adjust home; use a commanded position or refit a removable horn with power off.
+Step 9 now has a computer-mediated, one-shot integration path. The first full recyclable/home cycle passed with user confirmation that the item dropped and the flap closed. The selected prototype configuration routes recyclable/home and e-waste/side; at this stage of bring-up, a full e-waste side cycle remained to be verified. Do not force the servo shaft/gears to adjust home; use a commanded position or refit a removable horn with power off.
 
 ## Data flow
 

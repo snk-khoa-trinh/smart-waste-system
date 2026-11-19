@@ -23,8 +23,8 @@ SQLite is supported for fast unit tests and a lightweight dashboard demo; Docker
 The camera owns the inlet ultrasonic sensor and JPEG/OTA endpoints. The DevKit
 owns both servos and the fill sensor, while also orchestrating camera snapshots,
 classification and separate outcome reporting. One compartment is physically
-sensed and two remain explicitly simulated. The mechanism has two calibrated
-pulse positions; unsupported/Unknown decisions do not actuate.
+sensed and two remain explicitly simulated. The controller uses calibrated
+pulse settings for supported routes; unsupported/Unknown decisions do not actuate.
 
 Only `camera` and `station` PlatformIO environments remain; see the
 [firmware guide](../firmware/README.md) for source files and build commands.
@@ -50,8 +50,8 @@ It bypasses capture/inference deliberately, records the operator-selected catego
 through `/api/filming/events`, and reports a separate acknowledged command outcome.
 Records are labelled provider=filming, model=operator-selected and simulated=true;
 no real classification or telemetry is fabricated. A USB-only reverse profile
-reuses the same two motor positions for a non-recyclable concept shot. It does not
-change autonomous category routing or add a third mechanical destination.
+provides the non-recyclable mechanism demonstration. This profile is separate
+from autonomous category routing.
 
 Separately staged inlet images can be attached to filming events. Capture metadata
 (arrival ID, checksum, save time) persists in `filming_captures`, with JPEG bytes

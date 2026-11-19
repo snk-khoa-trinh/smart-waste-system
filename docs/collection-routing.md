@@ -124,8 +124,8 @@ show the value calculated on screen rather than hardcoding a promotional number.
    direction chevrons; the heading names the previous/next stop and any floor
    connection. **All legs** shows other legs in teal and the return in amber.
    Numbers identify stops; colors identify route roles, not waste categories.
-6. Hover/focus a bin for its three fill percentages; click/tap to pin the same
-   summary. Demo percentages are explicitly synthetic. Live previews use current
+6. Click/tap a bin, or focus it and press Enter, to open its three fill percentages.
+   Escape or an outside click dismisses the popup. Demo percentages are explicitly synthetic. Live previews use current
    station readings (including marked stale/invalid/missing values), independently
    of the route snapshot; refresh failures are labelled cached.
 7. **Next stop** follows the itinerary across floors. After the final stop,
@@ -136,7 +136,7 @@ show the value calculated on screen rather than hardcoding a promotional number.
 
 Map lines break at floor transitions; they never draw a diagonal between floors.
 The SVG route overlay is project-specific, composed with the existing floor plan
-and shadcn Select, Tabs, Button and tooltip primitives. A generic UI component
+and shadcn Select, Tabs, Button and Popover primitives. A generic UI component
 cannot supply building graph geometry or route numbering.
 
 ## Validation

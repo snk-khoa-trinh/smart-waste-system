@@ -5,14 +5,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
-/** Same summary on hover/focus and pinned click/tap; one shared SVG trigger. */
+/** One fill summary opened by click, tap, or keyboard activation. */
 export function BinPreview({
   children,
   content,
@@ -23,23 +17,9 @@ export function BinPreview({
   label: string;
 }) {
   const [pinned, setPinned] = useState(false);
-  const [hovered, setHovered] = useState(false);
   return (
     <Popover open={pinned} onOpenChange={setPinned}>
-      <TooltipProvider delayDuration={150}>
-        <Tooltip open={hovered && !pinned} onOpenChange={setHovered}>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>{children}</PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent
-            side="top"
-            collisionPadding={16}
-            className="w-72 max-w-[calc(100vw-2rem)]"
-          >
-            {content}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent
         aria-label={label}
         side="top"

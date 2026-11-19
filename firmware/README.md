@@ -72,4 +72,4 @@ with the same close/position/open/close/return ordering. It ends holding2000us a
 opener1800us; ordinary routing/startup still use home700us. Status advertises
 `filming_reverse_supported`; the laptop refuses reverse motion on old firmware.
 It is never selected by autonomous classification. See the
-[filming handoff](../docs/filming-handoff.md) for the two-position limitation.
+[filming handoff](../docs/filming-handoff.md) for staged demonstration procedures.

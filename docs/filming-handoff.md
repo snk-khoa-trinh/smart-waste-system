@@ -162,13 +162,11 @@ Use a small caption such as **“Scripted mechanism demonstration”** on these 
 The distance-change animation explains the design; it is not a measured sensor
 trace unless an actual trace was recorded.
 
-The prototype has two calibrated rotation positions, not three independently
-reachable compartments. Normal automatic routing is recyclable at home and e-waste
-at the side; non-recyclable/Unknown decisions do not actuate. For filming only,
-the non-recyclable shot reverses the e-waste motion using the same two positions.
-Describe it as a staged routing concept, not evidence of three-way autonomous
-sorting. Match temporary compartment labels to the shot, and do not imply all
-three destinations were available simultaneously.
+Normal automatic routing is recyclable at home and e-waste at the side;
+non-recyclable/Unknown decisions do not actuate. For filming only, the
+non-recyclable shot uses the reverse motion profile. Present all three shots
+as staged mechanism tests with operator-selected categories, and match the
+compartment labels to each take.
 
 Filming records have provider `filming`, model `operator-selected`, no confidence
 score, a scripted reason, and `simulated=true`. Motors are physical; the selected
@@ -203,7 +201,7 @@ Record each row as its own clip. Leave 2–3 seconds still before and after acti
 | 04A — Item input, take A | 4–7 s | Inlet closeup | Drop one item and withdraw the hand. Nothing else needs to run. Add a distance-gap change animation in editing. |
 | 04B — Item input, take B | 4–7 s | Same view or alternate angle | Record a second separate insertion clip for the second edited cycle. No sensor/camera trigger script is needed for either input shot. |
 | 05 — Recyclable mechanism | 10–15 s | Chute and flap visible | With the item already placed, run the recyclable filming command once. Show release at home and the flap closing. Caption: “Scripted · Recyclable”. |
-| 06 — Non-recyclable concept | 10–15 s | Same mechanism view | Run the non-recyclable filming command once: reversed origin/destination from the e-waste sequence. Caption: “Scripted · Non-recyclable routing concept”. |
+| 06 — Non-recyclable mechanism | 10–15 s | Same mechanism view | Run the non-recyclable filming command once: reversed origin/destination from the e-waste sequence. Caption: “Scripted · Non-recyclable mechanism test”. |
 | 07 — E-waste mechanism | 10–15 s | Same mechanism view | Run the e-waste command once: home → side → release → close → home. Caption: “Scripted · E-waste”. |
 | 08 — Results | 10–15 s | Direct Records screen recording | Show the corresponding three filming entries and completed command outcomes. Keep the filming provider label visible. |
 | 09 — Fill monitoring | 12–20 s | Separate sensor test setup, then screen | After mounted closeups are done, power down and unmount the brain/sensor as needed for short wires. Restore power/network and show a flat target moving toward the sensor, then the physical compartment value updating on screen. Caption: “Bench demonstration of fill monitoring”. |
@@ -292,7 +290,7 @@ precise volume accuracy, and keep synthetic values visibly distinct.
 ## File naming and editor handoff
 
 Use names such as `04A-input-take01.mp4`, `05-recyclable-take02.mp4`,
-`06-non-recyclable-concept-take01.mp4`, `08-records-screen.mp4` and
+`06-non-recyclable-mechanism-take01.mp4`, `08-records-screen.mp4` and
 `09-fill-bench-take01.mp4`. Keep raw footage outside Git, together with this brief
 and the editor project. Record two takes of important actions and review them
 before moving the setup.
@@ -312,7 +310,7 @@ before moving the setup.
 - Show complete motor movement in each mechanism take; simple cuts and captions
   are sufficient. Label sped-up waits rather than implying faster real latency.
 - Use Records entries from these takes and preserve the `filming` labels.
-- Explain the three-category design and two-position prototype limitation briefly.
+- Explain the three-category design and the purpose of the mechanism tests briefly.
 - Optional lab footage is a separate example of image inference, not the source
   of a scripted category used for motor footage.
 - Finish with the close-to-wide pullback. Keep narration/music clear and quiet.
@@ -339,8 +337,8 @@ Record these actions slowly (separate short clips are fine):
 3. Pause on the ID-order baseline, planned travel and calculated savings. These
    are estimates for the same selected stops, not a measured cleaner time trial.
 4. Toggle **ID order**, then **Planned** to show the different path/numbering.
-5. Keep **Selected leg** on to show the blue direction arrows. Hover a bin to
-   show percentages (explicitly synthetic in this scene); click to pin and Escape
+5. Keep **Selected leg** on to show the blue direction arrows. Click/tap a bin to
+   show percentages (explicitly synthetic in this scene), and press Escape
    to close. Briefly switch **All legs** to show teal legs and the amber return.
    Change Route floor, select a numbered stop, then Next stop.
    Show that floor changes use the selected elevator/stairs connection.

@@ -1,0 +1,494 @@
+[
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/B75C3F8D-E5C6-4192-876B-7A4005EE1085.MP4",
+    "name": "B75C3F8D-E5C6-4192-876B-7A4005EE1085.MP4",
+    "bytes": 168379950,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "89/3",
+        "avg_frame_rate": "39600000/1332623",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 2,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "88.853333"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/Screencast From 2026-11-08 21-01-08.mp4",
+    "name": "Screencast From 2026-11-08 21-01-08.mp4",
+    "bytes": 24771,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 416,
+        "height": 644,
+        "r_frame_rate": "10000/1",
+        "avg_frame_rate": "155000/48677",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "9.735400"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/Screencast From 2026-11-08 21-38-45.mp4",
+    "name": "Screencast From 2026-11-08 21-38-45.mp4",
+    "bytes": 6112218,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1084,
+        "height": 708,
+        "r_frame_rate": "10000/1",
+        "avg_frame_rate": "3860000/412921",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "82.584200"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_203346.mp4",
+    "name": "video_20261107_203346.mp4",
+    "bytes": 10593688,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "12465000/415463",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "9.237959"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_203424.mp4",
+    "name": "video_20261107_203424.mp4",
+    "bytes": 8479503,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "6600000/219977",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "7.332567"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_203522.mp4",
+    "name": "video_20261107_203522.mp4",
+    "bytes": 7592278,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "352800/11759",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "6.557625"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_203541.mp4",
+    "name": "video_20261107_203541.mp4",
+    "bytes": 8517819,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "110500/3683",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "7.366000"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_204649.mp4",
+    "name": "video_20261107_204649.mp4",
+    "bytes": 3330835,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "911250/30371",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "2.699644"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_204741.mp4",
+    "name": "video_20261107_204741.mp4",
+    "bytes": 4241409,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "9540000/317981",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "3.533033"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_204904.mp4",
+    "name": "video_20261107_204904.mp4",
+    "bytes": 4125643,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "573750/19123",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "3.423292"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_205033.mp4",
+    "name": "video_20261107_205033.mp4",
+    "bytes": 11812402,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "13950000/464953",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "10.332289"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_212609.mp4",
+    "name": "video_20261107_212609.mp4",
+    "bytes": 37439856,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "45225000/1507357",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "33.496822"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_221300.mp4",
+    "name": "video_20261107_221300.mp4",
+    "bytes": 21280696,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "51030000/1700827",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "18.898078"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_221515.mp4",
+    "name": "video_20261107_221515.mp4",
+    "bytes": 26930195,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "64800000/2159789",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "23.997656"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_221921.mp4",
+    "name": "video_20261107_221921.mp4",
+    "bytes": 23182613,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "18570000/618941",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "20.635167"
+    }
+  },
+  {
+    "path": "01-footage/Demo-20261115T130825Z-1-001/Demo/video_20261107_222102.mp4",
+    "name": "video_20261107_222102.mp4",
+    "bytes": 23008637,
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "hevc",
+        "codec_type": "video",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "30/1",
+        "avg_frame_rate": "13815000/460457",
+        "tags": {}
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "sample_rate": "48000",
+        "channels": 1,
+        "r_frame_rate": "0/0",
+        "avg_frame_rate": "0/0",
+        "tags": {}
+      }
+    ],
+    "format": {
+      "duration": "20.464756"
+    }
+  }
+]
