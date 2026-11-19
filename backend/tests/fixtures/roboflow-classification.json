@@ -1,0 +1,19 @@
+{
+  "outputs": [
+    {
+      "model_id": "waste-classifier-psdrg-0mtyc/1",
+      "predictions": {
+        "predictions": [
+          {
+            "class": "Recyclable",
+            "class_id": 0,
+            "confidence": 0.9851
+          }
+        ],
+        "top": "Recyclable",
+        "confidence": 0.9851,
+        "prediction_type": "classification"
+      }
+    }
+  ]
+}

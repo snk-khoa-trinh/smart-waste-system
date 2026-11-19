@@ -1,0 +1,21 @@
+# Opt-in trusted LAN test. Base deployment remains loopback-only.
+services:
+  api:
+    ports:
+      - '${HARDWARE_BIND_IP:?Run scripts/configure-hardware.py}:8000:8000'
+  broker-init:
+    environment:
+      MQTT_CAMERA_PASSWORD: ${MQTT_CAMERA_PASSWORD:?Configure hardware credentials}
+      MQTT_MONITOR_PASSWORD: ${MQTT_MONITOR_PASSWORD:?Configure hardware credentials}
+    command:
+      - |
+        cp /source/mosquitto.conf /config/
+        cp /source/acl.hardware /config/acl
+        mosquitto_passwd -b -c /config/passwords worker "$$MQTT_PASSWORD"
+        mosquitto_passwd -b /config/passwords camera-s11 "$$MQTT_CAMERA_PASSWORD"
+        mosquitto_passwd -b /config/passwords monitor-s11 "$$MQTT_MONITOR_PASSWORD"
+        chown -R 1883:1883 /config
+        chmod 600 /config/passwords
+  broker:
+    ports:
+      - '${HARDWARE_BIND_IP:?Run scripts/configure-hardware.py}:1883:1883'

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+Vite/React dashboard for collection staff: a 2D/3D building overview, bin directory,
+bin detail pages, sorting/collection records and a standalone image classifier lab.
+TanStack Router handles routes; Query fetches backend state. shadcn/ui and Tailwind
+provide the shared component/theme baseline. Three.js/R3F/Drei load for 3D preview.
 
-First, run the development server:
+[Repository guide](../README.md) · [UI agent rules](AGENTS.md) · [Building preview](../docs/building-preview.md)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Run and check
+
+Use Nub 0.9.0 (not Bun). Commands run from the repository root:
+
+```sh
+nub --cwd frontend ci
+nub --cwd frontend run dev
+nub --cwd frontend run lint
+nub --cwd frontend run test
+nub --cwd frontend run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Vite proxies `/api` to the backend configured by `API_URL` (default localhost8000).
+The root guide has the Compose development command. Production serves `dist/`
+through Nginx, including direct-route fallback. No provider/device secret belongs
+in browser code or `VITE_*` variables.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Routes and source
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `/`: building/floor workspace, attention overlays and bin popovers.
+- `/bins`, `/bins/:stationId`: filters, readings, connectivity and history.
+- `/routes`: cleaner collection route, live/demo priorities, same-stop comparison and floor itinerary.
+- `/records`: Sorting and Collections tabs; optional `station` query parameter.
+- `/inference`: independent JPEG preview and classifier test; no bin selector.
+- `src/components/ui/`: shared shadcn primitives and variants.
+- `src/lib/`: query and attention/data helpers.
+- `src/components/building-preview/`: shared geometry, SVG plan and lazy 3D viewer.
 
-## Learn More
+```sh
+DASHBOARD_URL=http://127.0.0.1:5173 nub --cwd frontend exec playwright test e2e/navigation.spec.ts e2e/building-preview.spec.ts
+```
 
-To learn more about Next.js, take a look at the following resources:
+Those browser tests mock API requests. `e2e/dashboard.spec.ts` performs mutations
+and classification: run it only against an isolated mock-provider demo stack.
+Use `CHROMIUM_PATH` if a system browser executable is required. Never use the live
+hardware/Roboflow stack for generic browser rendering checks.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+For filming only, `/bins/filming-demo` and its telemetry poll every500ms to show
+one-second synthetic fill steps. Other query paths retain the normal five-second
+interval. The synthetic label, timestamps and stale semantics remain visible;
+there is no client-side fabrication/interpolation of sensor values.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Building previews also support Riverside Complex (8 floors/96 corridor bins) with
+matching 2D/3D wing/core geometry. Route maps reuse the floor plan, with API graph
+paths rather than straight lines between bins. See [collection routing](../docs/collection-routing.md)
+for eligibility, modeled cost assumptions, source labels and filming steps.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Route visibility uses a selected blue approach with direction chevrons, plus an
+optional teal/amber full circuit. Click/tap a bin, or focus it and press Enter,
+to open its fill levels; Escape dismisses the popup. The live preview reads the station API with quality/freshness labels rather
+than treating the route snapshot as current sensor data. Dedicated UI regressions
+are in `e2e/collection-route.spec.ts`; all API responses there are isolated fixtures.

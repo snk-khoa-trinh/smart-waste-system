@@ -1,0 +1,8 @@
+# Explicit opt-in; combine with the trusted-LAN hardware test configuration.
+services:
+  api:
+    environment:
+      INFERENCE_PROVIDER: roboflow
+      INFERENCE_TIMEOUT: ${ROBOFLOW_TEST_TIMEOUT:-45}
+      ROBOFLOW_OUTPUT: ${ROBOFLOW_TEST_OUTPUT:-predictions}
+      LABEL_MAPPING: ${ROBOFLOW_TEST_LABEL_MAPPING:?Configure .env.roboflow from .env.roboflow.example}

@@ -1,0 +1,9 @@
+user worker
+topic read $SYS/broker/version
+topic read waste/v1/stations/+/+/+
+user camera-s11
+topic write waste/v1/stations/s11/s11-cam/heartbeat
+topic write waste/v1/stations/s11/s11-cam/outcome
+user monitor-s11
+topic write waste/v1/stations/s11/s11-monitor/heartbeat
+topic write waste/v1/stations/s11/s11-monitor/fill
