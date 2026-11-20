@@ -11,7 +11,7 @@ image-classification service and a web dashboard. It brings together electronics
 embedded programming, mechanical control, backend development, and interface
 design in one system intended for caretakers and collection staff.
 
-**[Watch the demo](video/video.mp4)** · **[Video and editing files](video/)** ·
+**[Watch the demo](https://github.com/user-attachments/assets/99f8b39c-7bf7-414c-8196-07f86ac94ef4)** · **[Video and editing files](video/)** ·
 **[Technical documentation](docs/README.md)** ·
 **[System architecture](docs/architecture.md)**
 
